@@ -106,18 +106,23 @@ step_version() {
   echo "$version" >"$STATE/version"
   npm version "$version" --no-git-tag-version --allow-same-version >/dev/null
 
+  # The notes leave out oasdiff's api-version-not-bumped check: the spec's
+  # info.version is not the SDK's version.
+  printf 'api-version-not-bumped none\n' >"$STATE/severity-levels.txt"
+  local changelog=(oasdiff changelog "$STATE/old.json" openapi.json --severity-levels "$STATE/severity-levels.txt")
   {
     if [ -z "$tag" ]; then
       echo "First release of \`$PACKAGE\`, generated from the Sinatra API spec."
+    elif [ "$("${changelog[@]}" --format json | jq length)" -gt 0 ]; then
+      # oasdiff's markdown has its own "## API Changes" section; drop its
+      # title line ("# API Changelog 1.0.0 vs. 1.0.0").
+      "${changelog[@]}" --format markdown | sed '1d' | cat -s
     else
-      echo "## API changes"
+      echo "## API Changes"
       echo
-      if [ "$(oasdiff changelog "$STATE/old.json" openapi.json --format json | jq length)" -gt 0 ]; then
-        # Drop oasdiff's title line ("# API Changelog 1.0.0 vs. 1.0.0").
-        oasdiff changelog "$STATE/old.json" openapi.json --format markdown | sed '1d' | cat -s
-      else
-        echo "None."
-      fi
+      echo "None."
+    fi
+    if [ -n "$tag" ]; then
       local log
       log=$(git log --no-merges --format='- %s (%h)' "$tag..HEAD")
       if [ -n "$log" ]; then
