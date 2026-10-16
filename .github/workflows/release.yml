@@ -1,0 +1,88 @@
+name: release
+
+# Polls the live API spec every hour. When it changed, or something was
+# committed since the last tag, this regenerates the SDK, runs every test,
+# works out the next version from the spec change, publishes to npm, then
+# commits openapi.json + src/generated, tags vX.Y.Z and creates a GitHub
+# release. Nothing leaves the runner unless the repository variable
+# PUBLISH_ENABLED is 'true' and the run isn't a dry run. See RELEASING.md.
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run every step except publish, commit and tag"
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write # push the release commit and tag, create the GitHub release
+      id-token: write # npm trusted publishing and provenance
+    env:
+      DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
+      # Publishing only ever happens from main.
+      PUBLISH_ENABLED: ${{ vars.PUBLISH_ENABLED == 'true' && github.ref == 'refs/heads/main' && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # tags and history, for the last tag and the commits since it
+
+      # No dependency cache in the job that publishes.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@11.21.1
+      - run: npm ci
+      - run: npm run tools
+
+      - name: Plan
+        id: plan
+        run: bash scripts/release.sh plan
+
+      - name: Regenerate
+        if: steps.plan.outputs.skip == 'false'
+        run: npm run generate
+      - name: Typecheck and build
+        if: steps.plan.outputs.skip == 'false'
+        run: npm run typecheck && npm run build
+      - name: Tests
+        if: steps.plan.outputs.skip == 'false'
+        run: |
+          npm test
+          npm run test:contract
+          npm run test:version
+          npm run check:package
+          npm run smoke
+
+      - name: Version
+        id: version
+        if: steps.plan.outputs.skip == 'false'
+        run: bash scripts/release.sh version
+
+      - name: Publish to npm
+        if: steps.plan.outputs.skip == 'false'
+        run: bash scripts/release.sh publish
+
+      - name: Commit, tag and GitHub release
+        if: steps.plan.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/release.sh tag
