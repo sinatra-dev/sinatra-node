@@ -42,20 +42,26 @@ jobs:
         with:
           fetch-depth: 0 # tags and history, for the last tag and the commits since it
 
+      # Needs only git, curl and jq, so a run with nothing to release stops
+      # before installing anything.
+      - name: Plan
+        id: plan
+        run: bash scripts/release.sh plan
+
       # No dependency cache in the job that publishes.
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - if: steps.plan.outputs.skip == 'false'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           package-manager-cache: false
 
       # Trusted publishing needs npm 11.5.1 or later.
-      - run: npm install -g npm@11.21.1
-      - run: npm ci
-      - run: npm run tools
-
-      - name: Plan
-        id: plan
-        run: bash scripts/release.sh plan
+      - if: steps.plan.outputs.skip == 'false'
+        run: npm install -g npm@11.21.1
+      - if: steps.plan.outputs.skip == 'false'
+        run: npm ci
+      - if: steps.plan.outputs.skip == 'false'
+        run: npm run tools
 
       - name: Regenerate
         if: steps.plan.outputs.skip == 'false'
