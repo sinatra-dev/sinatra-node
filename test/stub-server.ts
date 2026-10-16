@@ -15,6 +15,8 @@ export interface StubReply {
   headers?: Record<string, string>;
   /** An object is sent as JSON; a string is sent as is; undefined sends no body. */
   body?: unknown;
+  /** Never answer: the request hangs until the client gives up. */
+  hang?: boolean;
 }
 
 export interface Stub {
@@ -41,6 +43,7 @@ export async function startStub(): Promise<Stub> {
         body,
       });
       const reply = queue.shift() ?? { status: 599, body: { error: "stub_exhausted" } };
+      if (reply.hang) return;
       const headers: Record<string, string> = { ...reply.headers };
       if (reply.body === undefined) {
         res.writeHead(reply.status, headers);

@@ -23,16 +23,33 @@ interface AttemptResult<T> {
   response?: Response;
 }
 
+export interface CallOptions {
+  /** Cancels the call, including a retry it is waiting to make. */
+  signal?: AbortSignal;
+  /** Milliseconds each attempt may take before it is aborted with a `TimeoutError`. `0` for none. */
+  timeout?: number;
+}
+
 /**
  * Runs `attempt` until it succeeds, fails with a status `retryOn` doesn't
  * cover, or runs out of retries. Every attempt must send the same request:
  * callers compute the `Idempotency-Key` once, outside `attempt`.
  */
-export async function withRetries<T>(retryOn: RetryOn, attempt: () => Promise<AttemptResult<T>>): Promise<T> {
+export async function withRetries<T>(
+  retryOn: RetryOn,
+  options: CallOptions,
+  attempt: (signal: AbortSignal) => Promise<AttemptResult<T>>,
+): Promise<T> {
   for (let retry = 0; ; retry++) {
-    const result = await attempt();
+    const limit = attemptSignal(options);
+    let result: AttemptResult<T>;
+    try {
+      result = await attempt(limit.signal);
+    } finally {
+      limit.done();
+    }
     const { response } = result;
-    // No response: fetch itself failed (network error). Surface it as is.
+    // No response: fetch itself failed (network error, timeout, abort). Surface it as is.
     if (!response) throw result.error;
     if (response.ok) {
       // A 2xx whose body didn't parse.
@@ -40,11 +57,33 @@ export async function withRetries<T>(retryOn: RetryOn, attempt: () => Promise<At
       return result.data as T;
     }
     if (retry < MAX_RETRIES && retryOn.has(response.status)) {
-      await sleep(retryDelayMs(response, retry));
+      await sleep(retryDelayMs(response, retry), options.signal);
       continue;
     }
     throw new SinatraError(response.status, result.error, response.headers);
   }
+}
+
+/** One attempt's signal: aborted by the caller's signal, or when the timeout passes. */
+function attemptSignal({ signal, timeout }: CallOptions): { signal: AbortSignal; done(): void } {
+  const controller = new AbortController();
+  const onAbort = () => controller.abort(signal?.reason);
+  if (signal?.aborted) onAbort();
+  else signal?.addEventListener("abort", onAbort, { once: true });
+  const timer =
+    timeout && timeout > 0 && Number.isFinite(timeout)
+      ? setTimeout(
+          () => controller.abort(new DOMException(`Request timed out after ${timeout}ms`, "TimeoutError")),
+          timeout,
+        )
+      : undefined;
+  return {
+    signal: controller.signal,
+    done: () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+    },
+  };
 }
 
 function retryDelayMs(response: Response, retry: number): number {
@@ -65,6 +104,17 @@ function parseRetryAfter(value: string | null): number | undefined {
   return Math.max(0, date - Date.now());
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) return reject(signal.reason);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(signal?.reason);
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
 }

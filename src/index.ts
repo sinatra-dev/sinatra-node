@@ -18,7 +18,7 @@ import type {
   TicketSearchResult,
   TicketsSearchData,
 } from "./generated/types.gen";
-import { RETRY_IDEMPOTENT, RETRY_NEVER, RETRY_UNAVAILABLE, withRetries } from "./retry";
+import { type CallOptions, RETRY_IDEMPOTENT, RETRY_NEVER, RETRY_UNAVAILABLE, type RetryOn, withRetries } from "./retry";
 
 export { SinatraError } from "./error";
 export type {
@@ -44,6 +44,10 @@ export type {
 } from "./generated/types.gen";
 
 export const DEFAULT_BASE_URL = "https://api.sinatra.dev";
+/** How long one attempt may take, by default. */
+export const DEFAULT_TIMEOUT_MS = 60_000;
+
+export type { CallOptions };
 
 export interface SinatraOptions {
   /** An API token (`sntr_...`). Defaults to the `SINATRA_TOKEN` environment variable. */
@@ -52,9 +56,15 @@ export interface SinatraOptions {
   baseUrl?: string;
   /** A `fetch` to use instead of the global one. */
   fetch?: typeof fetch;
+  /**
+   * Milliseconds each attempt may take before it is aborted with a
+   * `TimeoutError`. Defaults to 60 seconds; `0` for none. A call can
+   * override it, and pass a `signal`, in its last argument.
+   */
+  timeout?: number;
 }
 
-export interface IdempotencyOptions {
+export interface IdempotencyOptions extends CallOptions {
   /**
    * 1 to 128 printable ASCII characters, with no spaces. When you leave it
    * out, the client makes a random UUID. Either way, every retry of the call
@@ -97,51 +107,71 @@ export class Sinatra {
         ...(options.fetch ? { fetch: options.fetch } : {}),
       }),
     );
-    this.me = new MeApi(client);
-    this.tasks = new TasksApi(client);
-    this.messages = new MessagesApi(client);
-    this.tickets = new TicketsApi(client);
+    const ctx: Context = { client, timeout: options.timeout ?? DEFAULT_TIMEOUT_MS };
+    this.me = new MeApi(ctx);
+    this.tasks = new TasksApi(ctx);
+    this.messages = new MessagesApi(ctx);
+    this.tickets = new TicketsApi(ctx);
   }
+}
+
+/** What every namespace shares: the generated client and the default timeout. */
+interface Context {
+  client: Client;
+  timeout: number;
+}
+
+/** Runs one call with the client's retry and timeout rules. */
+function call<T>(
+  ctx: Context,
+  retryOn: RetryOn,
+  options: CallOptions,
+  attempt: (client: Client, signal: AbortSignal) => Promise<{ data?: T; error?: unknown; response?: Response }>,
+): Promise<T> {
+  const limits = { signal: options.signal, timeout: options.timeout ?? ctx.timeout };
+  return withRetries(retryOn, limits, (signal) => attempt(ctx.client, signal));
 }
 
 export class MeApi {
   /** @internal */
-  constructor(private readonly client: Client) {}
+  constructor(private readonly ctx: Context) {}
 
   /** `me.get`: the user the token acts as, and their workspaces. */
-  get(): Promise<Me> {
-    return withRetries(RETRY_IDEMPOTENT, () => api.meGet({ client: this.client }));
+  get(options: CallOptions = {}): Promise<Me> {
+    return call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) => api.meGet({ client, signal }));
   }
 
   /** `me.revokeToken`: revokes the token this client sends. Later requests get `401`. */
-  async revokeToken(): Promise<void> {
-    await withRetries(RETRY_IDEMPOTENT, () => api.meRevokeToken({ client: this.client }));
+  async revokeToken(options: CallOptions = {}): Promise<void> {
+    await call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) => api.meRevokeToken({ client, signal }));
   }
 }
 
 export class TasksApi {
   /** @internal */
-  constructor(private readonly client: Client) {}
+  constructor(private readonly ctx: Context) {}
 
   /** `tasks.list`: one page of the workspace's tasks, most recently active first. */
-  list(workspaceId: string, query: ListTasksQuery = {}): Promise<TaskList> {
-    return withRetries(RETRY_IDEMPOTENT, () =>
-      api.tasksList({ client: this.client, path: { workspaceId }, query: defined(query) }),
+  list(workspaceId: string, query: ListTasksQuery = {}, options: CallOptions = {}): Promise<TaskList> {
+    return call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) =>
+      api.tasksList({ client, signal, path: { workspaceId }, query: defined(query) }),
     );
   }
 
   /** Every task from `query.cursor` on (or from the start), following `nextCursor` page by page. */
-  listAll(workspaceId: string, query: ListTasksQuery = {}): AsyncGenerator<Task, void, undefined> {
+  listAll(workspaceId: string, query: ListTasksQuery = {}, options: CallOptions = {}): AsyncGenerator<Task, void, undefined> {
     return paginate(
       query.cursor,
-      (cursor) => this.list(workspaceId, { ...query, cursor }),
+      (cursor) => this.list(workspaceId, { ...query, cursor }, options),
       (page) => [page.tasks, page.nextCursor],
     );
   }
 
   /** `tasks.get`: one task, wherever it started. */
-  get(workspaceId: string, taskId: string): Promise<Task> {
-    return withRetries(RETRY_IDEMPOTENT, () => api.tasksGet({ client: this.client, path: { workspaceId, taskId } }));
+  get(workspaceId: string, taskId: string, options: CallOptions = {}): Promise<Task> {
+    return call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) =>
+      api.tasksGet({ client, signal, path: { workspaceId, taskId } }),
+    );
   }
 
   /**
@@ -150,20 +180,22 @@ export class TasksApi {
    */
   create(workspaceId: string, body: CreateTaskRequest, options: IdempotencyOptions = {}): Promise<CreateTaskResponse> {
     const key = options.idempotencyKey ?? crypto.randomUUID();
-    return withRetries(RETRY_IDEMPOTENT, () =>
-      api.tasksCreate({ client: this.client, path: { workspaceId }, body, headers: { "Idempotency-Key": key } }),
+    return call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) =>
+      api.tasksCreate({ client, signal, path: { workspaceId }, body, headers: { "Idempotency-Key": key } }),
     );
   }
 
   /** `tasks.stop`: stops the task's running turn. A task that isn't running is `409 not_running`. */
-  stop(workspaceId: string, taskId: string): Promise<StopTaskResponse> {
-    return withRetries(RETRY_UNAVAILABLE, () => api.tasksStop({ client: this.client, path: { workspaceId, taskId } }));
+  stop(workspaceId: string, taskId: string, options: CallOptions = {}): Promise<StopTaskResponse> {
+    return call(this.ctx, RETRY_UNAVAILABLE, options, (client, signal) =>
+      api.tasksStop({ client, signal, path: { workspaceId, taskId } }),
+    );
   }
 }
 
 export class MessagesApi {
   /** @internal */
-  constructor(private readonly client: Client) {}
+  constructor(private readonly ctx: Context) {}
 
   /** `messages.create`: sends a follow-up on a task started from the API, CLI, MCP or dashboard. */
   create(
@@ -173,13 +205,8 @@ export class MessagesApi {
     options: IdempotencyOptions = {},
   ): Promise<CreateMessageResponse> {
     const key = options.idempotencyKey ?? crypto.randomUUID();
-    return withRetries(RETRY_IDEMPOTENT, () =>
-      api.messagesCreate({
-        client: this.client,
-        path: { workspaceId, taskId },
-        body,
-        headers: { "Idempotency-Key": key },
-      }),
+    return call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) =>
+      api.messagesCreate({ client, signal, path: { workspaceId, taskId }, body, headers: { "Idempotency-Key": key } }),
     );
   }
 
@@ -187,17 +214,22 @@ export class MessagesApi {
    * `messages.list`: one page of the task's conversation, oldest first. To wait
    * for a reply, poll with `after` set to the `id` of the last entry you read.
    */
-  list(workspaceId: string, taskId: string, query: ListMessagesQuery = {}): Promise<MessageList> {
-    return withRetries(RETRY_IDEMPOTENT, () =>
-      api.messagesList({ client: this.client, path: { workspaceId, taskId }, query: defined(query) }),
+  list(workspaceId: string, taskId: string, query: ListMessagesQuery = {}, options: CallOptions = {}): Promise<MessageList> {
+    return call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) =>
+      api.messagesList({ client, signal, path: { workspaceId, taskId }, query: defined(query) }),
     );
   }
 
   /** Every entry after `query.after` (or from the start), following `next` page by page. */
-  listAll(workspaceId: string, taskId: string, query: ListMessagesQuery = {}): AsyncGenerator<Message, void, undefined> {
+  listAll(
+    workspaceId: string,
+    taskId: string,
+    query: ListMessagesQuery = {},
+    options: CallOptions = {},
+  ): AsyncGenerator<Message, void, undefined> {
     return paginate(
       query.after,
-      (after) => this.list(workspaceId, taskId, { ...query, after }),
+      (after) => this.list(workspaceId, taskId, { ...query, after }, options),
       (page) => [page.messages, page.next],
     );
   }
@@ -205,12 +237,12 @@ export class MessagesApi {
 
 export class TicketsApi {
   /** @internal */
-  constructor(private readonly client: Client) {}
+  constructor(private readonly ctx: Context) {}
 
   /** `tickets.search`: open Linear and GitHub issues you could delegate. */
-  search(workspaceId: string, query: SearchTicketsQuery = {}): Promise<TicketSearchResult> {
-    return withRetries(RETRY_IDEMPOTENT, () =>
-      api.ticketsSearch({ client: this.client, path: { workspaceId }, query: defined(query) }),
+  search(workspaceId: string, query: SearchTicketsQuery = {}, options: CallOptions = {}): Promise<TicketSearchResult> {
+    return call(this.ctx, RETRY_IDEMPOTENT, options, (client, signal) =>
+      api.ticketsSearch({ client, signal, path: { workspaceId }, query: defined(query) }),
     );
   }
 
@@ -218,8 +250,10 @@ export class TicketsApi {
    * `tickets.delegate`: hands Sinatra an existing issue as you. Not retried:
    * the operation takes no `Idempotency-Key`.
    */
-  delegate(workspaceId: string, body: DelegateTicketRequest): Promise<DelegateTicketResponse> {
-    return withRetries(RETRY_NEVER, () => api.ticketsDelegate({ client: this.client, path: { workspaceId }, body }));
+  delegate(workspaceId: string, body: DelegateTicketRequest, options: CallOptions = {}): Promise<DelegateTicketResponse> {
+    return call(this.ctx, RETRY_NEVER, options, (client, signal) =>
+      api.ticketsDelegate({ client, signal, path: { workspaceId }, body }),
+    );
   }
 }
 

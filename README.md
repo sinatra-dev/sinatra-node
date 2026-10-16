@@ -17,28 +17,30 @@ import { Sinatra } from "@sinatra-dev/sdk";
 
 const sinatra = new Sinatra(); // reads SINATRA_TOKEN
 const me = await sinatra.me.get();
-const workspaceId = me.workspaces[0].id;
+const workspace = me.workspaces[0];
+if (!workspace) throw new Error("The token's user isn't in any workspace yet.");
 
 const { task } = await sinatra.tasks.create(
-  workspaceId,
+  workspace.id,
   { prompt: "Fix the flaky login test", repo: "acme/web" },
   { idempotencyKey: "fix-flaky-login-1" },
 );
 
+// The turn is done when the task leaves these statuses (for example, it reaches replied or pr_open).
+const WORKING = new Set(["pending", "investigating", "implementing", "rework"]);
 let after: string | undefined;
-let replied = false;
-while (!replied) {
-  const page = await sinatra.messages.list(workspaceId, task.id, { after });
-  for (const m of page.messages) {
+for (;;) {
+  const { status } = await sinatra.tasks.get(workspace.id, task.id);
+  for await (const m of sinatra.messages.listAll(workspace.id, task.id, { after })) {
     console.log(`${m.role}: ${m.body}`);
-    replied ||= m.role === "agent";
     after = m.id;
   }
-  if (!replied) await new Promise((r) => setTimeout(r, 5000));
+  if (!WORKING.has(status)) break;
+  await new Promise((r) => setTimeout(r, 3000));
 }
 ```
 
-The API has no streaming: poll `messages.list` with `after` set to the last entry you read. `tasks.get` tells you where the task is (`status`, `queued`, `pullRequest`).
+The API has no streaming. To wait for a reply, read the conversation after the last entry you've seen, and check the task's `status`: the agent posts one reply per turn, and the turn is done when the task stops working. The loop reads the status before the conversation, so it never stops before printing the reply that ended the turn. An unknown status counts as done, so the loop can't wait forever on a status added after this was written. See [How replies work](https://docs.sinatra.dev/docs/cli-and-api#how-replies-work).
 
 ## Authentication
 
@@ -48,7 +50,17 @@ Create a personal access token on the [Access tokens](https://app.sinatra.dev/to
 const sinatra = new Sinatra({ token: process.env.MY_TOKEN });
 ```
 
-The constructor throws if it finds no token. Other options: `baseUrl` (defaults to `https://api.sinatra.dev`) and `fetch`, to use a `fetch` other than the global one.
+The constructor throws if it finds no token. Other options:
+
+- `baseUrl`: defaults to `https://api.sinatra.dev`.
+- `timeout`: how long each attempt may take, in milliseconds, before it's aborted with a `TimeoutError`. Defaults to 60 seconds; `0` turns it off.
+- `fetch`: a `fetch` to use instead of the global one.
+
+Every method takes `{ signal, timeout }` as its last argument: `signal` cancels the call, including a retry it's waiting to make, and `timeout` overrides the client's for that call.
+
+```ts
+await sinatra.tasks.get(workspaceId, taskId, { timeout: 5_000 });
+```
 
 ## Operations
 
@@ -86,7 +98,7 @@ The client retries a request up to 3 times when it's safe to repeat:
 - `429`: after the `Retry-After` the server sends, at most 60 seconds.
 - `503`: after 0.5s, then 1s, then 2s.
 
-GETs, `me.revokeToken`, `tasks.create` and `messages.create` retry on both. `tasks.stop` retries on `503` only. `tickets.delegate` takes no idempotency key and is never retried. Other errors are never retried.
+GETs, `me.revokeToken`, `tasks.create` and `messages.create` retry on both. `tasks.stop` retries on `503` only. `tickets.delegate` takes no idempotency key and is never retried. Other errors, timeouts and network failures are never retried.
 
 ## Errors
 
@@ -115,7 +127,7 @@ try {
 | `body` | The response body: the parsed JSON, or the text. Refusals carry extra fields here, such as `billingUrl`. |
 | `headers` | The response headers. |
 
-Network failures are not wrapped: they reject with the error `fetch` threw.
+Network failures, timeouts and aborts are not wrapped: they reject with the error `fetch` threw, the `TimeoutError`, or your signal's reason.
 
 The [API reference](https://docs.sinatra.dev/docs/api-reference) lists every operation's error codes.
 

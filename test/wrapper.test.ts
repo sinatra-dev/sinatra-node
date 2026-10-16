@@ -281,6 +281,25 @@ describe("requests", () => {
   });
 });
 
+describe("timeouts", () => {
+  it("a hung request is aborted", async () => {
+    stub.reply({ status: 0, hang: true }, { status: 0, hang: true });
+
+    const timedOut = await new Sinatra({ token: "sntr_test", baseUrl: stub.url, timeout: 50 }).tasks
+      .get(WS, "task_1")
+      .catch((e: unknown) => e);
+    expect((timedOut as Error).name).toBe("TimeoutError");
+
+    const controller = new AbortController();
+    const cancelled = sinatra.tasks.get(WS, "task_1", { signal: controller.signal }).catch((e: unknown) => e);
+    await vi.waitFor(() => expect(stub.requests).toHaveLength(2));
+    controller.abort(new Error("caller gave up"));
+    expect(((await cancelled) as Error).message).toBe("caller gave up");
+
+    expect(stub.requests).toHaveLength(2);
+  });
+});
+
 describe("pagination", () => {
   it("list iterator follows nextCursor", async () => {
     stub.reply(
