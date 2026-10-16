@@ -1,0 +1,73 @@
+{
+  "name": "@sinatra-dev/sdk",
+  "version": "0.0.0",
+  "description": "TypeScript client for the Sinatra API: start, follow and stop Sinatra tasks, and delegate Linear and GitHub issues.",
+  "keywords": [
+    "sinatra",
+    "sinatra.dev",
+    "sdk",
+    "api-client",
+    "coding-agent"
+  ],
+  "homepage": "https://docs.sinatra.dev/docs/api-reference",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sinatra-dev/sinatra-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sinatra-dev/sinatra-node/issues"
+  },
+  "author": "Sinatra <contact@sinatra.dev>",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "generate": "openapi-ts",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project unit",
+    "test:contract": "node scripts/contract.mjs",
+    "test:version": "PATH=\"$PWD/.tools/bin:$PATH\" bash scripts/next-version.test.sh",
+    "check:generated": "bash scripts/check-generated.sh",
+    "smoke": "node scripts/smoke.mjs",
+    "prepack": "npm run build",
+    "check:package": "publint --strict && attw --pack . --profile node16",
+    "tools": "bash scripts/install-oasdiff.sh"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "0.18.5",
+    "@hey-api/openapi-ts": "0.99.0",
+    "@stoplight/prism-cli": "5.16.0",
+    "@types/node": "22.20.5",
+    "publint": "0.3.25",
+    "tsup": "9.0.0",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}
