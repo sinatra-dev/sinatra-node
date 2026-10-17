@@ -298,6 +298,12 @@ describe("timeouts", () => {
 
     expect(stub.requests).toHaveLength(2);
   });
+
+  it("a timeout too long for setTimeout doesn't abort at once", async () => {
+    stub.reply({ status: 200, delayMs: 30, body: task() });
+
+    await expect(sinatra.tasks.get(WS, "task_1", { timeout: 2 ** 31 })).resolves.toMatchObject({ id: "task_1" });
+  });
 });
 
 describe("pagination", () => {

@@ -17,6 +17,8 @@ export interface StubReply {
   body?: unknown;
   /** Never answer: the request hangs until the client gives up. */
   hang?: boolean;
+  /** Answer after this many milliseconds. */
+  delayMs?: number;
 }
 
 export interface Stub {
@@ -44,6 +46,10 @@ export async function startStub(): Promise<Stub> {
       });
       const reply = queue.shift() ?? { status: 599, body: { error: "stub_exhausted" } };
       if (reply.hang) return;
+      if (reply.delayMs) setTimeout(() => send(reply), reply.delayMs);
+      else send(reply);
+    });
+    const send = (reply: StubReply) => {
       const headers: Record<string, string> = { ...reply.headers };
       if (reply.body === undefined) {
         res.writeHead(reply.status, headers);
@@ -54,7 +60,7 @@ export async function startStub(): Promise<Stub> {
       if (typeof reply.body !== "string") headers["content-type"] ??= "application/json";
       res.writeHead(reply.status, headers);
       res.end(text);
-    });
+    };
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
   const { port } = server.address() as AddressInfo;

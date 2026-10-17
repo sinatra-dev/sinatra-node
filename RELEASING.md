@@ -79,7 +79,7 @@ npm can only attach a trusted publisher to a package that already exists, so the
    gh workflow run release.yml --repo sinatra-dev/sinatra-node
    sleep 10   # the run takes a moment to appear
    gh run watch --repo sinatra-dev/sinatra-node \
-     "$(gh run list --workflow release.yml --repo sinatra-dev/sinatra-node --limit 1 --json databaseId --jq '.[0].databaseId')"
+     "$(gh run list --workflow release.yml --event workflow_dispatch --repo sinatra-dev/sinatra-node --limit 1 --json databaseId --jq '.[0].databaseId')"
    npm view @sinatra-dev/sdk version   # 0.1.0
    ```
 

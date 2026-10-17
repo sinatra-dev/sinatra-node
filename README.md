@@ -53,7 +53,7 @@ const sinatra = new Sinatra({ token: process.env.MY_TOKEN });
 The constructor throws if it finds no token. Other options:
 
 - `baseUrl`: defaults to `https://api.sinatra.dev`.
-- `timeout`: how long each attempt may take, in milliseconds, before it's aborted with a `TimeoutError`. Defaults to 60 seconds; `0` turns it off.
+- `timeout`: how long each attempt may take, in milliseconds, before it's aborted with a `TimeoutError`. Defaults to 60 seconds; `0` turns it off. Values above 2^31−1 (about 24.8 days) are cut to that, the most `setTimeout` can wait.
 - `fetch`: a `fetch` to use instead of the global one.
 
 Every method takes `{ signal, timeout }` as its last argument: `signal` cancels the call, including a retry it's waiting to make, and `timeout` overrides the client's for that call.

@@ -6,6 +6,8 @@ export const MAX_RETRIES = 3;
 const BACKOFF_MS = 500;
 /** A `Retry-After` longer than this is cut to it. */
 const MAX_RETRY_AFTER_MS = 60_000;
+/** setTimeout's limit: a longer delay overflows and fires at once. */
+const MAX_TIMER_MS = 2 ** 31 - 1;
 
 /** Which statuses a request may be retried on. */
 export type RetryOn = ReadonlySet<number>;
@@ -26,7 +28,7 @@ interface AttemptResult<T> {
 export interface CallOptions {
   /** Cancels the call, including a retry it is waiting to make. */
   signal?: AbortSignal;
-  /** Milliseconds each attempt may take before it is aborted with a `TimeoutError`. `0` for none. */
+  /** Milliseconds each attempt may take before it is aborted with a `TimeoutError`. `0` for none; at most 2^31-1 (about 24.8 days). */
   timeout?: number;
 }
 
@@ -74,7 +76,7 @@ function attemptSignal({ signal, timeout }: CallOptions): { signal: AbortSignal;
     timeout && timeout > 0 && Number.isFinite(timeout)
       ? setTimeout(
           () => controller.abort(new DOMException(`Request timed out after ${timeout}ms`, "TimeoutError")),
-          timeout,
+          Math.min(timeout, MAX_TIMER_MS),
         )
       : undefined;
   return {

@@ -251,6 +251,33 @@ step_publish() {
   npm publish "$STATE/$tarball" --provenance --access public --ignore-scripts
 }
 
+# Checks the release commit from the artifact before it is pushed: one commit
+# on top of the commit this job checked out (the one build started from), that
+# changes only the spec, the generated code and the version.
+verify_release_commit() {
+  local sha=$1 version=$2 base parents path
+  base=$(git rev-parse HEAD)
+  [ "$(state base-sha)" = "$base" ] ||
+    die "the artifact was built from $(state base-sha), but this job checked out $base"
+  parents=$(git rev-list --parents -n 1 "$sha" | cut -d' ' -f2-)
+  [ "$parents" = "$base" ] ||
+    die "release commit $sha must have exactly one parent, $base; it has: ${parents:-none}"
+  while IFS= read -r path; do
+    case "$path" in
+      openapi.json | package.json | package-lock.json | src/generated/*) ;;
+      *) die "release commit $sha changes $path; a release commit may only change openapi.json, src/generated/, package.json and package-lock.json" ;;
+    esac
+  done < <(git diff --name-only "$base" "$sha")
+  # The manifests may change only their version.
+  [ "$(git show "$sha:package.json" | jq -S 'del(.version)')" = "$(git show "$base:package.json" | jq -S 'del(.version)')" ] ||
+    die "release commit $sha changes package.json beyond its version"
+  local lock='del(.version, .packages[""].version)'
+  [ "$(git show "$sha:package-lock.json" | jq -S "$lock")" = "$(git show "$base:package-lock.json" | jq -S "$lock")" ] ||
+    die "release commit $sha changes package-lock.json beyond its version"
+  [ "$(git show "$sha:package.json" | jq -r .version)" = "$version" ] ||
+    die "release commit $sha doesn't set package.json's version to $version"
+}
+
 step_tag() {
   if [ -s "$STATE/missing-tag" ]; then
     local missing
@@ -264,6 +291,7 @@ step_tag() {
   sha=$(state release-sha)
   git fetch -q "$STATE/release.bundle" HEAD
   [ "$(git rev-parse FETCH_HEAD)" = "$sha" ] || die "release.bundle doesn't hold release commit $sha"
+  verify_release_commit "$sha" "$version"
   git_bot tag -a "v$version" "$sha" -m "v$version"
   git push --atomic origin "$sha:refs/heads/$BRANCH" "refs/tags/v$version"
   gh release create "v$version" --verify-tag --title "v$version" --notes-file "$STATE/notes.md"

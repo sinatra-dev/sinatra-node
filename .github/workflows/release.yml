@@ -134,7 +134,7 @@ jobs:
   tag:
     needs: [build, publish]
     if: >-
-      always() && needs.build.result == 'success' &&
+      !cancelled() && needs.build.result == 'success' &&
       vars.PUBLISH_ENABLED == 'true' && github.ref == 'refs/heads/main' && inputs.dry_run != true &&
       ((needs.build.outputs.release == 'true' && needs.publish.result == 'success') ||
        (needs.build.outputs.release != 'true' && needs.build.outputs.missing_release != ''))
