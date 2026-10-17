@@ -3,4 +3,4 @@ dist/
 *.tgz
 .tools/
 coverage/
-.release/
+release-state/

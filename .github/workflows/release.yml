@@ -1,11 +1,21 @@
 name: release
 
-# Polls the live API spec every hour. When it changed, or something was
-# committed since the last tag, this regenerates the SDK, runs every test,
-# works out the next version from the spec change, publishes to npm, then
-# commits openapi.json + src/generated, tags vX.Y.Z and creates a GitHub
-# release. Nothing leaves the runner unless the repository variable
-# PUBLISH_ENABLED is 'true' and the run isn't a dry run. See RELEASING.md.
+# Polls the live API spec every hour. When it changed, or a release-worthy
+# commit landed since the last tag, this regenerates the SDK, runs every
+# test and works out the next version (build), publishes the packed tarball
+# to npm (publish), then pushes the release commit and its vX.Y.Z tag and
+# creates the GitHub release (tag). See RELEASING.md.
+#
+# The three jobs hold different powers. build runs the ~370 dev dependencies
+# with a read-only token and no stored credentials. publish holds only the
+# npm OIDC token and installs nothing. tag holds only the write token and
+# installs nothing.
+#
+# publish and tag run only when the repository variable PUBLISH_ENABLED is
+# 'true', on main, and not as a dry run. That condition is written out in
+# both jobs' `if:`, from vars/inputs/github only, so nothing build runs can
+# open it. Keep the two copies (and build's DRY_RUN/PUBLISH_ENABLED, used for
+# its notice) in step.
 
 on:
   schedule:
@@ -15,7 +25,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Run every step except publish, commit and tag"
+        description: "Build, test and version, but skip publish and tag"
         type: boolean
         default: false
 
@@ -23,72 +33,124 @@ concurrency:
   group: release
   cancel-in-progress: false
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     permissions:
-      contents: write # push the release commit and tag, create the GitHub release
-      id-token: write # npm trusted publishing and provenance
+      contents: read
+    outputs:
+      release: ${{ steps.plan.outputs.release }}
+      missing_release: ${{ steps.plan.outputs.missing_release }}
+      version: ${{ steps.version.outputs.version }}
     env:
-      DRY_RUN: ${{ inputs.dry_run && 'true' || 'false' }}
-      # Publishing only ever happens from main.
+      DRY_RUN: ${{ inputs.dry_run == true && 'true' || 'false' }}
       PUBLISH_ENABLED: ${{ vars.PUBLISH_ENABLED == 'true' && github.ref == 'refs/heads/main' && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # tags and history, for the last tag and the commits since it
+          persist-credentials: false
 
-      # Needs only git, curl and jq, so a run with nothing to release stops
-      # before installing anything.
+      - run: bash scripts/install-oasdiff.sh
+
+      # Needs only git, curl, jq, gh and oasdiff, so a run with nothing to
+      # release stops before installing anything.
       - name: Plan
         id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: bash scripts/release.sh plan
 
-      # No dependency cache in the job that publishes.
-      - if: steps.plan.outputs.skip == 'false'
+      # No dependency cache in a release.
+      - if: steps.plan.outputs.release == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           package-manager-cache: false
-
-      # Trusted publishing needs npm 11.5.1 or later.
-      - if: steps.plan.outputs.skip == 'false'
-        run: npm install -g npm@11.21.1
-      - if: steps.plan.outputs.skip == 'false'
+      - if: steps.plan.outputs.release == 'true'
         run: npm ci
-      - if: steps.plan.outputs.skip == 'false'
-        run: npm run tools
-
       - name: Regenerate
-        if: steps.plan.outputs.skip == 'false'
+        if: steps.plan.outputs.release == 'true'
         run: npm run generate
       - name: Typecheck and build
-        if: steps.plan.outputs.skip == 'false'
+        if: steps.plan.outputs.release == 'true'
         run: npm run typecheck && npm run build
       - name: Tests
-        if: steps.plan.outputs.skip == 'false'
+        if: steps.plan.outputs.release == 'true'
         run: |
           npm test
           npm run test:contract
           npm run test:version
           npm run check:package
           npm run smoke
-
       - name: Version
         id: version
-        if: steps.plan.outputs.skip == 'false'
+        if: steps.plan.outputs.release == 'true'
         run: bash scripts/release.sh version
+      - name: Release commit and tarball
+        if: steps.plan.outputs.release == 'true'
+        run: bash scripts/release.sh pack
 
+      - if: steps.plan.outputs.release == 'true' || steps.plan.outputs.missing_release != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: release-state/
+          if-no-files-found: error
+      - name: Gate
+        if: steps.plan.outputs.release == 'true' || steps.plan.outputs.missing_release != ''
+        run: bash scripts/release.sh gate
+
+  publish:
+    needs: build
+    if: >-
+      needs.build.outputs.release == 'true' &&
+      vars.PUBLISH_ENABLED == 'true' && github.ref == 'refs/heads/main' && inputs.dry_run != true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing and provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: release-state
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@11.21.1
       - name: Publish to npm
-        if: steps.plan.outputs.skip == 'false'
         run: bash scripts/release.sh publish
 
-      - name: Commit, tag and GitHub release
-        if: steps.plan.outputs.skip == 'false'
+  tag:
+    needs: [build, publish]
+    if: >-
+      always() && needs.build.result == 'success' &&
+      vars.PUBLISH_ENABLED == 'true' && github.ref == 'refs/heads/main' && inputs.dry_run != true &&
+      ((needs.build.outputs.release == 'true' && needs.publish.result == 'success') ||
+       (needs.build.outputs.release != 'true' && needs.build.outputs.missing_release != ''))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # push the release commit and tag, create the GitHub release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: release-state
+      - name: Push the release commit and tag, create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: bash scripts/release.sh tag
