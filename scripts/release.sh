@@ -262,12 +262,17 @@ verify_release_commit() {
   parents=$(git rev-list --parents -n 1 "$sha" | cut -d' ' -f2-)
   [ "$parents" = "$base" ] ||
     die "release commit $sha must have exactly one parent, $base; it has: ${parents:-none}"
-  while IFS= read -r path; do
+  # --no-renames: with rename detection a moved file lists only its new path,
+  # so a file moved into src/generated/ would hide that its old path was
+  # deleted. -z: paths NUL-separated and unquoted, whatever they contain.
+  git diff --no-renames --name-only -z "$base" "$sha" >"$STATE/changed-paths" ||
+    die "couldn't list the paths release commit $sha changes"
+  while IFS= read -r -d '' path; do
     case "$path" in
       openapi.json | package.json | package-lock.json | src/generated/*) ;;
       *) die "release commit $sha changes $path; a release commit may only change openapi.json, src/generated/, package.json and package-lock.json" ;;
     esac
-  done < <(git diff --name-only "$base" "$sha")
+  done <"$STATE/changed-paths"
   # The manifests may change only their version.
   [ "$(git show "$sha:package.json" | jq -S 'del(.version)')" = "$(git show "$base:package.json" | jq -S 'del(.version)')" ] ||
     die "release commit $sha changes package.json beyond its version"
