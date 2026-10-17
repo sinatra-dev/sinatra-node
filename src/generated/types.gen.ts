@@ -109,7 +109,7 @@ export type DelegateTicketResponse = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_unlinked`, `linear_not_connected`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`.
      */
     error: string;
     /**
@@ -174,6 +174,10 @@ export type Me = {
          * The user's name, if they have one.
          */
         name: string | null;
+        /**
+         * The user's email address: the one they sign in with by email, or their primary GitHub email.
+         */
+        email: string;
     };
     /**
      * The workspaces the user belongs to, ordered by name.
@@ -1096,6 +1100,7 @@ export type TicketsDelegateErrors = {
      * Conflict. The `error` code says which:
      *
      * - `capacity_full`: The workspace's queue is full, so the issue is refused before it is touched. `reason` is the message to show, the same one the dashboard shows.
+     * - `linear_reconnect_required`: Linear stopped accepting the workspace's Linear connection. A workspace owner or admin has to reconnect Linear in the workspace's settings.
      */
     409: Error;
     /**

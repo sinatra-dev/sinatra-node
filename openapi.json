@@ -1462,7 +1462,7 @@
             }
           },
           "409": {
-            "description": "Conflict. The `error` code says which:\n\n- `capacity_full`: The workspace's queue is full, so the issue is refused before it is touched. `reason` is the message to show, the same one the dashboard shows.",
+            "description": "Conflict. The `error` code says which:\n\n- `capacity_full`: The workspace's queue is full, so the issue is refused before it is touched. `reason` is the message to show, the same one the dashboard shows.\n- `linear_reconnect_required`: Linear stopped accepting the workspace's Linear connection. A workspace owner or admin has to reconnect Linear in the workspace's settings.",
             "headers": {
               "x-request-id": {
                 "$ref": "#/components/headers/RequestId"
@@ -1712,7 +1712,7 @@
         "properties": {
           "error": {
             "type": "string",
-            "description": "A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_unlinked`, `linear_not_connected`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`."
+            "description": "A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`."
           },
           "reason": {
             "description": "A sentence saying what went wrong and, where it helps, what to do. Written to show to a person.",
@@ -1791,12 +1791,17 @@
                   }
                 ],
                 "description": "The user's name, if they have one."
+              },
+              "email": {
+                "type": "string",
+                "description": "The user's email address: the one they sign in with by email, or their primary GitHub email."
               }
             },
             "required": [
               "id",
               "githubLogin",
-              "name"
+              "name",
+              "email"
             ],
             "description": "The user the token acts as."
           },
