@@ -42,6 +42,8 @@ jobs:
         run: npm test
       - name: Contract tests (Prism)
         run: npm run test:contract
+      - name: Contract tests against a spec with new fields
+        run: npm run test:contract:future
       - name: next-version.sh tests
         run: npm run test:version
       - name: Package exports

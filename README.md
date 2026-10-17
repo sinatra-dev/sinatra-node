@@ -144,6 +144,7 @@ npm run generate       # regenerates src/generated from openapi.json
 npm run typecheck && npm run build
 npm test               # wrapper tests against a local stub server
 npm run test:contract  # every operation against a Prism mock of openapi.json
+npm run test:contract:future  # the same, with new fields added to the spec
 npm run test:version   # scripts/next-version.sh
 ```
 

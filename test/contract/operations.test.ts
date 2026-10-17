@@ -12,6 +12,9 @@ const sinatra = new Sinatra({ token: "sntr_contract", baseUrl });
 const WS = "ws_contract";
 const TASK = "task_contract";
 
+// Assert the fields the wrapper's callers rely on and tolerate the rest: the
+// API adds response fields over time, and an exact match would fail every
+// hourly release the day it does.
 describe("every operation matches the spec", () => {
   it("me.get", async () => {
     const me = await sinatra.me.get();
@@ -44,7 +47,7 @@ describe("every operation matches the spec", () => {
   });
 
   it("tasks.stop", async () => {
-    expect(await sinatra.tasks.stop(WS, TASK)).toEqual({ accepted: true });
+    expect(await sinatra.tasks.stop(WS, TASK)).toMatchObject({ accepted: true });
   });
 
   it("messages.create", async () => {
@@ -63,11 +66,11 @@ describe("every operation matches the spec", () => {
   });
 
   it("tickets.delegate (linear)", async () => {
-    expect(await sinatra.tickets.delegate(WS, { source: "linear", id: "ENG-123" })).toEqual({ ok: true });
+    expect(await sinatra.tickets.delegate(WS, { source: "linear", id: "ENG-123" })).toMatchObject({ ok: true });
   });
 
   it("tickets.delegate (github)", async () => {
-    expect(await sinatra.tickets.delegate(WS, { source: "github", repo: "acme/web", number: 7 })).toEqual({ ok: true });
+    expect(await sinatra.tickets.delegate(WS, { source: "github", repo: "acme/web", number: 7 })).toMatchObject({ ok: true });
   });
 });
 

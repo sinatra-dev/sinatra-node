@@ -1,5 +1,6 @@
-// Runs the contract tests: starts `prism mock openapi.json --errors` on a free
-// port, waits for it, runs the vitest "contract" project against it, stops it.
+// Runs the contract tests: starts `prism mock openapi.json --errors` (or
+// $CONTRACT_SPEC) on a free port, waits for it, runs the vitest "contract"
+// project against it, stops it.
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
 import { fileURLToPath } from "node:url";
@@ -17,7 +18,9 @@ const port = await new Promise((resolve, reject) => {
 });
 const url = `http://127.0.0.1:${port}`;
 
-const prism = spawn(bin("prism"), ["mock", "openapi.json", "--errors", "-h", "127.0.0.1", "-p", String(port), "-v", "warn"], {
+// CONTRACT_SPEC: mock another spec than openapi.json (test:contract:future).
+const spec = process.env.CONTRACT_SPEC ?? "openapi.json";
+const prism = spawn(bin("prism"), ["mock", spec, "--errors", "-h", "127.0.0.1", "-p", String(port), "-v", "warn"], {
   cwd: root,
   stdio: ["ignore", "inherit", "inherit"],
 });

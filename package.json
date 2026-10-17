@@ -58,7 +58,8 @@
     "smoke": "node scripts/smoke.mjs",
     "prepack": "npm run build",
     "check:package": "publint --strict && attw --pack . --profile node16",
-    "tools": "bash scripts/install-oasdiff.sh"
+    "tools": "bash scripts/install-oasdiff.sh",
+    "test:contract:future": "mkdir -p .tools && jq -f test/contract/future-fields.jq openapi.json > .tools/future-openapi.json && CONTRACT_SPEC=.tools/future-openapi.json node scripts/contract.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",

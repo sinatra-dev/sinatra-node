@@ -87,6 +87,7 @@ jobs:
         run: |
           npm test
           npm run test:contract
+          npm run test:contract:future
           npm run test:version
           npm run check:package
           npm run smoke
