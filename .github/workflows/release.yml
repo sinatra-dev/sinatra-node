@@ -62,6 +62,7 @@ jobs:
         id: plan
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: bash scripts/release.sh plan
 
       # No dependency cache in a release.
@@ -70,6 +71,9 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+      # The npm the publish job uses, so pack's publish dry run matches it.
+      - if: steps.plan.outputs.release == 'true'
+        run: npm install -g npm@11.21.1
       - if: steps.plan.outputs.release == 'true'
         run: npm ci
       - name: Regenerate
@@ -153,4 +157,5 @@ jobs:
       - name: Push the release commit and tag, create the GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: bash scripts/release.sh tag

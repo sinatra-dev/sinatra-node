@@ -13,6 +13,8 @@
 #            npm pack the package. Everything the later jobs need is then in
 #            release-state/, which the workflow uploads as an artifact.
 #   gate     Say whether the publish and tag jobs will run, and why not.
+# CI:
+#   verify-pack  Pack the checkout and run the publish command with --dry-run.
 # Job "publish" (id-token: write, installs nothing):
 #   publish  Refuse if main moved since the build. Skip if this exact tarball is
 #            already on npm; refuse if a different one is. Otherwise publish it.
@@ -34,7 +36,9 @@ cd "$(dirname "$0")/.."
 PACKAGE=@sinatra-dev/sdk
 SPEC_URL=${SPEC_URL:-https://api.sinatra.dev/openapi.json}
 BRANCH=${RELEASE_BRANCH:-main}
-STATE=release-state
+# Absolute, so every path handed to npm is unambiguous: npm reads a relative
+# "release-state/x.tgz" as GitHub shorthand (user/repo) and tries to clone it.
+STATE="$(pwd -P)/release-state"
 # Only commits touching these count as a reason to release. Docs, CI and
 # test-only commits wait for the next release.
 RELEASE_PATHS=(src package.json openapi-ts.config.ts tsup.config.ts tsconfig.json)
@@ -176,6 +180,39 @@ step_version() {
   } | summary
 }
 
+# The one npm publish command, shared by the publish job and the dry run.
+npm_publish() {
+  npm publish "$STATE/$(state tarball)" --provenance --access public --ignore-scripts "$@"
+}
+
+# Builds and packs into $STATE; records the tarball's name and sha1.
+pack_tarball() {
+  # Pack without lifecycle scripts so the JSON on stdout is only npm's.
+  npm run --silent build >/dev/null
+  local packed
+  packed=$(npm pack --ignore-scripts --json --pack-destination "$STATE")
+  jq -r '.[0].filename' <<<"$packed" >"$STATE/tarball"
+  jq -r '.[0].shasum' <<<"$packed" >"$STATE/shasum"
+}
+
+# Runs the real npm CLI on the publish command with --dry-run (it uploads
+# nothing), so a path npm misreads or a flag it rejects fails here, not in the
+# publish job. npm's dry run still refuses a version that's already on npm,
+# after reading the tarball; that's fine here (the publish job decides what to
+# do about a published version), so it counts as a pass.
+publish_dry_run() {
+  local out
+  if out=$(npm_publish --dry-run 2>&1); then
+    echo "npm publish --dry-run accepts $(state tarball)."
+  elif grep -q 'npm notice total files:' <<<"$out" &&
+    grep -q 'cannot publish over the previously published versions' <<<"$out"; then
+    echo "npm publish --dry-run read $(state tarball); its version is already on npm."
+  else
+    printf '%s\n' "$out" >&2
+    die "npm publish --dry-run rejected $(state tarball)"
+  fi
+}
+
 step_pack() {
   local version base
   version=$(state version)
@@ -186,14 +223,17 @@ step_pack() {
   git rev-parse HEAD >"$STATE/release-sha"
   git bundle create "$STATE/release.bundle" "$base..HEAD" 2>/dev/null
 
-  # Build from the release commit, then pack without lifecycle scripts so the
-  # JSON on stdout is only npm's.
-  npm run --silent build >/dev/null
-  local packed
-  packed=$(npm pack --ignore-scripts --json --pack-destination "$STATE")
-  jq -r '.[0].filename' <<<"$packed" >"$STATE/tarball"
-  jq -r '.[0].shasum' <<<"$packed" >"$STATE/shasum"
+  pack_tarball
   echo "Packed $(state tarball) (sha1 $(state shasum)) from release commit $(state release-sha)."
+  publish_dry_run
+}
+
+# CI: pack the checkout and dry-run the publish command, without a release.
+step_verify_pack() {
+  rm -rf "$STATE"
+  mkdir -p "$STATE"
+  pack_tarball
+  publish_dry_run
 }
 
 step_gate() {
@@ -220,9 +260,8 @@ remote_head() {
 }
 
 step_publish() {
-  local version tarball shasum base head
+  local version shasum base head
   version=$(state version)
-  tarball=$(state tarball)
   shasum=$(state shasum)
   base=$(state base-sha)
 
@@ -248,7 +287,7 @@ step_publish() {
     *) die "couldn't check whether $PACKAGE@$version is on npm: $err" ;;
   esac
 
-  npm publish "$STATE/$tarball" --provenance --access public --ignore-scripts
+  npm_publish
 }
 
 # Checks the release commit from the artifact before it is pushed: one commit
@@ -304,5 +343,6 @@ step_tag() {
 
 case "${1:-}" in
   plan | version | pack | gate | publish | tag) "step_$1" ;;
-  *) die "usage: release.sh plan|version|pack|gate|publish|tag" ;;
+  verify-pack) step_verify_pack ;;
+  *) die "usage: release.sh plan|version|pack|gate|publish|tag|verify-pack" ;;
 esac

@@ -28,6 +28,8 @@ jobs:
           node-version: 24
           cache: npm
 
+      # The npm the release workflow publishes with.
+      - run: npm install -g npm@11.21.1
       - run: npm ci
       - run: npm run tools
 
@@ -46,6 +48,10 @@ jobs:
         run: npm run check:package
       - name: Package contents
         run: npm pack --dry-run
+      # The release's exact publish command, run by the real npm CLI with
+      # --dry-run on a packed tarball: catches paths or flags npm misreads.
+      - name: Publish dry run
+        run: bash scripts/release.sh verify-pack
 
       - name: Smoke on Node 24
         run: npm run smoke
