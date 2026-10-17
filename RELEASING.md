@@ -23,14 +23,14 @@ When publish keeps failing with `@sinatra-dev/sdk@X.Y.Z is already on npm with s
 ```sh
 # The run whose tag job failed, the first one that published X.Y.Z:
 gh run list --workflow release.yml --repo sinatra-dev/sinatra-node
-gh run download <run-id> --name release --dir release-state --repo sinatra-dev/sinatra-node
+gh run download <run-id> --name release --dir ./release-state --repo sinatra-dev/sinatra-node
 
 # Check that it's the one npm has: the two shasums must match.
 cat release-state/shasum
 npm view "@sinatra-dev/sdk@$(cat release-state/version)" dist.shasum
 
 # Tag the commit that was published, and push only the tag.
-git fetch release-state/release.bundle HEAD
+git fetch ./release-state/release.bundle HEAD
 v="v$(cat release-state/version)"
 git tag -a "$v" FETCH_HEAD -m "$v"
 git push origin "$v"
