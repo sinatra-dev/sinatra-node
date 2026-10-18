@@ -1,13 +1,19 @@
 {
   "name": "@sinatra-dev/sdk",
   "version": "0.1.1",
-  "description": "TypeScript client for the Sinatra API: start, follow and stop Sinatra tasks, and delegate Linear and GitHub issues.",
+  "description": "Official TypeScript client for sinatra.dev, the AI coding agent that turns Linear and GitHub issues into pull requests: start, follow and stop tasks, and delegate issues.",
   "keywords": [
     "sinatra",
     "sinatra.dev",
     "sdk",
     "api-client",
-    "coding-agent"
+    "coding-agent",
+    "ai-coding-agent",
+    "background-agent",
+    "linear",
+    "github",
+    "pull-request",
+    "automation"
   ],
   "homepage": "https://docs.sinatra.dev/docs/api-reference",
   "repository": {
