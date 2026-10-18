@@ -1,6 +1,6 @@
 {
   "name": "@sinatra-dev/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Official TypeScript client for sinatra.dev, the AI coding agent that turns Linear and GitHub issues into pull requests: start, follow and stop tasks, and delegate issues.",
   "keywords": [
     "sinatra",
