@@ -634,7 +634,7 @@ export type TasksCreateErrors = {
      * Conflict. The `error` code says which:
      *
      * - `capacity_full`: The workspace's queue is full. `reason` is the message to show, the same one the dashboard shows. When starting a task, the body also has `plan`, `running`, `queued` and `billingUrl`.
-     * - `github_not_connected`: The workspace isn't connected to GitHub (`refusal` is `missing`), or its GitHub App installation is suspended (`refusal` is `suspended`), so a task has no repository to work in. `reason` says what to do and ends with `settingsUrl`: the workspace's Integrations settings, where an owner or admin connects GitHub, or the installation's page on GitHub when it's suspended.
+     * - `github_not_connected`: The start names a repository but the workspace isn't connected to GitHub (`refusal` is `missing`), or its GitHub App installation is suspended (`refusal` is `suspended`). Without GitHub, a start that names no repository runs: it can answer, research or plan. `reason` says what to do and ends with `settingsUrl`: the workspace's Integrations settings, where an owner or admin connects GitHub, or the installation's page on GitHub when it's suspended.
      * - `idempotency_conflict`: The `Idempotency-Key` was already used for a start with a different prompt, or a different repository or title if the retry sends them.
      * - `payment_required`: Billing would stop the task: you have no model access in this workspace (`refusal` is `own_credentials_required`), or its subscription is past due (`refusal` is `subscription_inactive`). `reason` says what to do and ends with `billingUrl`, the settings section that fixes it: your model credentials for `own_credentials_required`, billing for `subscription_inactive`.
      */
