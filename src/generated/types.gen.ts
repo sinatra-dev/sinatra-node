@@ -1077,7 +1077,7 @@ export type TicketsDelegateErrors = {
      * - `invalid_repo`: `repo` isn't in `owner/name` form.
      * - `issue_closed`: The issue is already closed.
      * - `linear_app_user_missing`: The workspace's Linear connection has to be redone so Sinatra can be assigned issues. Reconnect Linear in the workspace's settings.
-     * - `linear_identity_unlinked`: Your Linear account isn't linked to your Sinatra user in this workspace. Link it in Settings first.
+     * - `linear_identity_unlinked`: Your Linear account isn't connected in this workspace, so Sinatra can't read Linear as you. Connect your Linear account in Settings first.
      * - `linear_not_connected`: The workspace isn't connected to Linear.
      * - `not_an_issue`: The number is a pull request. Only issues can be delegated.
      * - `repo_disabled`: The repository isn't enabled in the workspace. Enable it in Settings first.

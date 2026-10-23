@@ -169,7 +169,7 @@ export const ticketsSearch = <ThrowOnError extends boolean = false>(options: Opt
  *
  * The rules match delegating from the dashboard. Sinatra reads a Linear issue as your linked Linear account, so you can only delegate issues you can see. Closed issues, pull requests and issues assigned to someone else are refused. If the workspace's queue is full, the request is refused before the issue is touched.
  *
- * A refusal returns an `error` code and a `reason` that says what to fix, for example `{"error": "linear_identity_unlinked", "reason": "Link your Linear identity in Settings first."}`.
+ * A refusal returns an `error` code and a `reason` that says what to fix, for example `{"error": "linear_identity_unlinked", "reason": "Connect your Linear account in Settings to search and delegate Linear issues."}`.
  */
 export const ticketsDelegate = <ThrowOnError extends boolean = false>(options: Options<TicketsDelegateData, ThrowOnError>): RequestResult<TicketsDelegateResponses, TicketsDelegateErrors, ThrowOnError> => (options.client ?? client).post<TicketsDelegateResponses, TicketsDelegateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
