@@ -109,7 +109,7 @@ export type DelegateTicketResponse = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`.
      */
     error: string;
     /**
@@ -1077,6 +1077,7 @@ export type TicketsDelegateErrors = {
      * - `invalid_repo`: `repo` isn't in `owner/name` form.
      * - `issue_closed`: The issue is already closed.
      * - `linear_app_user_missing`: The workspace's Linear connection has to be redone so Sinatra can be assigned issues. Reconnect Linear in the workspace's settings.
+     * - `linear_identity_conflict`: Your Linear account is linked to another Sinatra account in this workspace, so connecting it again won't help. Ask a workspace owner to remove that binding in Settings.
      * - `linear_identity_unlinked`: Your Linear account isn't connected in this workspace, so Sinatra can't read Linear as you. Connect your Linear account in Settings first.
      * - `linear_not_connected`: The workspace isn't connected to Linear.
      * - `not_an_issue`: The number is a pull request. Only issues can be delegated.
