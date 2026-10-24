@@ -270,7 +270,7 @@ export type Task = {
      */
     source: string;
     /**
-     * The task's title. `null` for a task whose issue has no title.
+     * The task's title: its issue's title, or a chat task's name. `null` for a task whose issue has no title, or a chat task not yet named.
      */
     title: string | null;
     /**
