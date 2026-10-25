@@ -40,6 +40,10 @@ export type CreateTaskRequest = {
      * `owner/name` of a repository connected to the workspace. Omit it to let the agent choose.
      */
     repo?: string | null;
+    /**
+     * A model from Sinatra's catalog, such as `anthropic/claude-opus-5-5` or `openai-codex/gpt-6.1-sol`, that every turn of the task runs on. The model picks its engine. Omit it to use the repository's or workspace's model.
+     */
+    model?: string | null;
 };
 
 /**
@@ -109,7 +113,7 @@ export type DelegateTicketResponse = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`.
      */
     error: string;
     /**
@@ -613,6 +617,7 @@ export type TasksCreateErrors = {
      *
      * - `bad_request`: The body isn't valid JSON, or is empty.
      * - `invalid_idempotency_key`: The `Idempotency-Key` isn't 1 to 128 printable ASCII characters, with no spaces.
+     * - `invalid_model`: `model` isn't a model Sinatra offers.
      * - `invalid_prompt`: `prompt` is missing, empty, or over 100,000 characters. A body not sent as `application/json` has no `prompt`.
      * - `invalid_repo`: `repo` isn't a repository connected to the workspace.
      * - `invalid_title`: `title` is empty or over 200 characters.
@@ -635,7 +640,7 @@ export type TasksCreateErrors = {
      *
      * - `capacity_full`: The workspace's queue is full. `reason` is the message to show, the same one the dashboard shows. When starting a task, the body also has `plan`, `running`, `queued` and `billingUrl`.
      * - `github_not_connected`: The start names a repository but the workspace isn't connected to GitHub (`refusal` is `missing`), or its GitHub App installation is suspended (`refusal` is `suspended`). Without GitHub, a start that names no repository runs: it can answer, research or plan. `reason` says what to do and ends with `settingsUrl`: the workspace's Integrations settings, where an owner or admin connects GitHub, or the installation's page on GitHub when it's suspended.
-     * - `idempotency_conflict`: The `Idempotency-Key` was already used for a start with a different prompt, or a different repository or title if the retry sends them.
+     * - `idempotency_conflict`: The `Idempotency-Key` was already used for a start with a different prompt, or a different repository, title or model if the retry sends them.
      * - `payment_required`: Billing would stop the task: you have no model access in this workspace (`refusal` is `own_credentials_required`), or its subscription is past due (`refusal` is `subscription_inactive`). `reason` says what to do and ends with `billingUrl`, the settings section that fixes it: your model credentials for `own_credentials_required`, billing for `subscription_inactive`.
      */
     409: Error;
