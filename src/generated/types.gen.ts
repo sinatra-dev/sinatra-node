@@ -41,7 +41,7 @@ export type CreateTaskRequest = {
      */
     repo?: string | null;
     /**
-     * A model from Sinatra's catalog, such as `anthropic/claude-opus-5-5` or `openai-codex/gpt-6.1-sol`, that every turn of the task runs on. The model picks its engine. Omit it to use the repository's or workspace's model.
+     * A model from Sinatra's catalog, such as `anthropic/claude-opus-5-5` or `openai-codex/gpt-6.1-sol`, that every agent on the task runs on. The model picks its engine. Omit it to use the repository's or workspace's model.
      */
     model?: string | null;
 };
@@ -141,11 +141,11 @@ export type Error = {
      */
     plan?: string;
     /**
-     * How many tasks the plan runs at a time, on `capacity_full` when starting a task.
+     * How many agents the plan runs at a time, on `capacity_full` when starting a task.
      */
     running?: number;
     /**
-     * How many tasks the plan queues, on `capacity_full` when starting a task.
+     * How many agents the plan lets wait, on `capacity_full` when starting a task.
      */
     queued?: number;
     /**
@@ -206,7 +206,7 @@ export type Message = {
      */
     role: string;
     /**
-     * What it is: `message` (a person's message), `response` (the agent's answer for a turn, or a notice from Sinatra such as a stop or files the agent produced), `clarify` (a question the agent needs answered to continue) or `error` (a refusal or failure from Sinatra). New kinds can appear.
+     * What it is: `message` (a person's message), `response` (the agent's answer, or a notice from Sinatra such as a stop or files the agent produced), `clarify` (a question the agent needs answered to continue) or `error` (a refusal or failure from Sinatra). New kinds can appear.
      */
     kind: string;
     /**
@@ -286,7 +286,7 @@ export type Task = {
      */
     pullRequest: PullRequest | null;
     /**
-     * `true` while a turn waits because the workspace is already running as many tasks at a time as its plan allows. The dashboard shows this as Queued.
+     * `true` while the task's agent waits because the workspace is already running as many agents at a time as its plan allows. The dashboard shows this as Waiting.
      */
     queued: boolean;
     /**
@@ -987,7 +987,7 @@ export type MessagesCreateError = MessagesCreateErrors[keyof MessagesCreateError
 
 export type MessagesCreateResponses = {
     /**
-     * The message was sent. The agent runs it as the task's next turn.
+     * The message was sent. It starts the task's next agent.
      */
     202: CreateMessageResponse;
 };

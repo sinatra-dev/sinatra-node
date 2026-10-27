@@ -66,7 +66,7 @@ export const tasksList = <ThrowOnError extends boolean = false>(options: Options
  *
  * If Sinatra saves your request but can't hand it to the agent yet, it answers `503 unavailable` with the new `taskId` and `messageId`. Retry with the same key, or send a message on that task, which sends your prompt first.
  *
- * A task started this way counts against the workspace's plan like any other. A running turn takes one of the plan's tasks at a time; past that it's queued. See [How the queue works](https://docs.sinatra.dev/docs/managed/billing#how-the-queue-works). It also needs model access, like a task delegated from Linear or GitHub. See [Models](https://docs.sinatra.dev/docs/configuration/models).
+ * A task started this way counts against the workspace's plan like any other. Each agent takes one of the plan's running places; past that it waits. See [How the queue works](https://docs.sinatra.dev/docs/managed/billing#how-the-queue-works). It also needs model access, like a task delegated from Linear or GitHub. See [Models](https://docs.sinatra.dev/docs/configuration/models).
  */
 export const tasksCreate = <ThrowOnError extends boolean = false>(options: Options<TasksCreateData, ThrowOnError>): RequestResult<TasksCreateResponses, TasksCreateErrors, ThrowOnError> => (options.client ?? client).post<TasksCreateResponses, TasksCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -92,7 +92,7 @@ export const tasksGet = <ThrowOnError extends boolean = false>(options: Options<
 /**
  * Stop a task
  *
- * Stops the task's running turn and returns `202` with `{"accepted": true}`. It works on any task in the workspace, whatever its source, and any member can stop one. A completed or cancelled task, or one whose session has already ended, is `409 not_running`.
+ * Stops the task's running agent and returns `202` with `{"accepted": true}`. It works on any task in the workspace, whatever its source, and any member can stop one. A completed or cancelled task, or one whose session has already ended, is `409 not_running`.
  */
 export const tasksStop = <ThrowOnError extends boolean = false>(options: Options<TasksStopData, ThrowOnError>): RequestResult<TasksStopResponses, TasksStopErrors, ThrowOnError> => (options.client ?? client).post<TasksStopResponses, TasksStopErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -105,18 +105,18 @@ export const tasksStop = <ThrowOnError extends boolean = false>(options: Options
  *
  * Returns the conversation of a task started from the API, CLI, MCP or dashboard, oldest first. A task that started elsewhere has no conversation here (`409 not_an_api_task`); its conversation is where it started.
  *
- * The conversation holds final answers and questions, not progress. The agent posts one reply per turn: its answer, or a question when it needs your input. Sinatra adds its own notices, such as errors and refusals.
+ * The conversation holds final answers and questions, not progress. Each agent posts one reply: its answer, or a question when it needs your input. Sinatra adds its own notices, such as errors and refusals.
  *
  * Each entry's `role` and `kind` say what it is:
  *
  * - `user` and `message`: a message a person sent. `messageId` is its idempotency key, or a generated id.
- * - `agent` and `response`: the agent's answer for a turn.
+ * - `agent` and `response`: the agent's answer.
  * - `agent` and `clarify`: a question the agent needs answered to continue.
  * - `platform` and `response` or `error`: a message from Sinatra itself, such as a refusal, an error, a stop, or files the agent produced.
  *
  * When `next` isn't `null`, more entries follow: pass `next` as `after` to get the next page.
  *
- * There is no streaming. To wait for a reply, poll this endpoint with `after` set to the `id` of the last entry you read, and check the task's `status` with Get a task. The turn is done when the task stops working, for example when it reaches `replied` or `pr_open`. While a task is queued, its conversation stays quiet; its `queued` field says so.
+ * There is no streaming. To wait for a reply, poll this endpoint with `after` set to the `id` of the last entry you read, and check the task's `status` with Get a task. The agent has handed back when the task stops working, for example when it reaches `replied` or `pr_open`. While a task is waiting for a running agent to finish, its conversation stays quiet; its `queued` field says so.
  */
 export const messagesList = <ThrowOnError extends boolean = false>(options: Options<MessagesListData, ThrowOnError>): RequestResult<MessagesListResponses, MessagesListErrors, ThrowOnError> => (options.client ?? client).get<MessagesListResponses, MessagesListErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -131,7 +131,7 @@ export const messagesList = <ThrowOnError extends boolean = false>(options: Opti
  *
  * Any member of the workspace can follow up on a task started from the API, CLI, MCP or dashboard. Follow up on other tasks, such as Linear or GitHub issues, where they started; here they return `409 not_an_api_task`. A task that has been idle for a while picks up again when you follow up.
  *
- * A message sent while the agent is working doesn't change the current turn. It waits and runs as the next turn. A message isn't refused when the workspace is running its limit of tasks: its turn takes a place in the queue, and if the queue is full, the refusal appears in the task's conversation instead.
+ * A message sent while the agent is working doesn't reach it. It waits and starts the next agent. A message isn't refused when the workspace is running as many agents at a time as its plan allows: the agent it starts takes a place in the queue, and if the queue is full, the refusal appears in the task's conversation instead.
  *
  * Send an `Idempotency-Key` so a retry is safe: a message retried with the same key is sent once. Keys belong to their sender, so two people using the same key send two messages. The key becomes the message's `messageId`.
  *
