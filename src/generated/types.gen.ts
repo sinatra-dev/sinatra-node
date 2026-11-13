@@ -5,6 +5,73 @@ export type ClientOptions = {
 };
 
 /**
+ * Your own account, combining the dashboard's profile and linked accounts. The workspace path checks membership; the account belongs to the token's user, not the workspace owner.
+ */
+export type Account = {
+    /**
+     * Your dashboard-visible account identity. Credentials and session metadata are never returned.
+     */
+    user: {
+        id: string;
+        email: string;
+        githubLogin: string | null;
+        name: string | null;
+        avatarUrl: string | null;
+        linearUserId: string | null;
+    };
+    /**
+     * Your memberships and dashboard workspace summaries, ordered by workspace name.
+     */
+    memberships: Array<{
+        membership: {
+            id: string;
+            workspaceId: string;
+            role: string;
+        };
+        workspace: {
+            id: string;
+            name: string;
+            createdAt: string;
+            githubAccountLogin: string | null;
+            githubAccountType: string | null;
+            linearOrganizationName: string | null;
+        };
+    }>;
+    linkedAccounts: {
+        /**
+         * Telegram's dashboard-visible account state. Identity, routing and bot are null when unavailable.
+         */
+        telegram: {
+            available: boolean;
+            identity: {
+                telegramUserId: string;
+                displayName: string | null;
+                linkedAt: string;
+            } | null;
+            requestWorkspaces: {
+                options: Array<{
+                    id: string;
+                    name: string;
+                }>;
+                current: {
+                    id: string;
+                    name: string | null;
+                    usable: boolean;
+                } | null;
+                routesTo: {
+                    id: string;
+                    name: string;
+                } | null;
+            } | null;
+            bot: {
+                username: string;
+                url: string;
+            } | null;
+        };
+    };
+};
+
+/**
  * A message to send on a task.
  */
 export type CreateMessageRequest = {
@@ -109,11 +176,25 @@ export type DelegateTicketResponse = {
 };
 
 /**
+ * Your account-wide email preferences, shared with the signed email-preferences page.
+ */
+export type EmailPreferences = {
+    /**
+     * Whether Sinatra may send you setup reminder emails.
+     */
+    setupReminders: boolean;
+    /**
+     * Whether Sinatra may send you task alert emails.
+     */
+    taskAlerts: boolean;
+};
+
+/**
  * The body of every error response.
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `assigned_to_other`, `bad_request`, `capacity_full`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `unavailable`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `actor_not_authorized`, `already_member`, `assigned_to_other`, `bad_request`, `capacity_full`, `consumed`, `declined`, `expired`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_prompt`, `invalid_repo`, `invalid_status`, `invalid_title`, `invalid_token`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `not_an_api_task`, `not_an_issue`, `not_found`, `not_running`, `payment_required`, `repo_disabled`, `request_not_found`, `request_not_pending`, `revoked`, `unavailable`.
      */
     error: string;
     /**
@@ -404,6 +485,17 @@ export type TicketSearchResult = {
 };
 
 /**
+ * Set at least one boolean. Omitted categories are unchanged; these preferences belong to you across all your workspaces.
+ */
+export type UpdateEmailPreferencesRequest = {
+    setupReminders: boolean;
+    taskAlerts?: boolean;
+} | {
+    setupReminders?: boolean;
+    taskAlerts: boolean;
+};
+
+/**
  * A workspace you belong to.
  */
 export type Workspace = {
@@ -421,10 +513,1054 @@ export type Workspace = {
     role: string;
 };
 
+export type WorkspaceAccess = {
+    memberships: Array<{
+        id: string;
+        role: string;
+        createdAt: string;
+        user: {
+            id: string;
+            name: string | null;
+            githubLogin: string | null;
+            avatarUrl: string | null;
+        };
+    }>;
+    accessRequests: Array<{
+        id: string;
+        state: string;
+        requestedAt: string;
+        reviewedAt: string | null;
+        assignedRole: string | null;
+        requester: {
+            id: string;
+            name: string | null;
+            githubLogin: string | null;
+            avatarUrl: string | null;
+        };
+    }>;
+    invites: Array<WorkspaceInvite>;
+};
+
+export type WorkspaceAccessApproved = {
+    request: {
+        id: string;
+        state: string;
+        assignedRole: string | null;
+    };
+    membership: {
+        id: string;
+        role: string;
+    };
+};
+
+export type WorkspaceAccessDenied = {
+    request: {
+        id: string;
+        state: string;
+    };
+};
+
+export type WorkspaceAccessOk = {
+    ok: true;
+};
+
+export type WorkspaceGrantRoleRequest = {
+    /**
+     * The role to grant. Ownership can only be transferred, never granted.
+     */
+    role: 'member' | 'admin';
+};
+
+/**
+ * An invitation's public metadata. No invitation token or redemption secret is returned.
+ */
+export type WorkspaceInvite = {
+    id: string;
+    email: string;
+    role: string;
+    /**
+     * active, revoked, expired, consumed or declined.
+     */
+    status: string;
+    expiresAt: string;
+    revokedAt: string | null;
+    declinedAt: string | null;
+    acceptedAt: string | null;
+    createdAt: string;
+};
+
+export type WorkspaceInviteCreateRequest = {
+    email: string;
+    role: 'member' | 'admin';
+};
+
+export type WorkspaceInviteResponse = {
+    invite: WorkspaceInvite;
+};
+
+export type WorkspaceMembershipResponse = {
+    membership: {
+        id: string;
+        role: string;
+    };
+};
+
+/**
+ * Read-only workspace overview, with the same member-visible data as the dashboard. No credentials or tokens.
+ */
+export type WorkspaceOverview = {
+    /**
+     * The workspace's id. Use it as `workspaceId` in the workspace endpoints.
+     */
+    id: string;
+    /**
+     * The workspace's name.
+     */
+    name: string;
+    /**
+     * Your role in it: `owner`, `admin` or `member`. New roles can appear.
+     */
+    role: string;
+    /**
+     * Repository environments rollout stage: `off`, `prepare` or `live`.
+     */
+    repoEnvironmentsStage: string;
+    repoEnvironmentsEnabled: boolean;
+    github: {
+        /**
+         * `connected` or `not_connected`.
+         */
+        status: string;
+        accountLogin: string | null;
+        accountType: string | null;
+        /**
+         * GitHub installation id as a decimal string.
+         */
+        installationId: string | null;
+    };
+    linear: {
+        /**
+         * `connected` or `not_connected`.
+         */
+        status: string;
+        organizationName: string | null;
+        organizationUrlKey: string | null;
+        currentUserHasReadToken: boolean;
+        needsReconnect: boolean;
+        recentTeams: Array<{
+            key: string;
+            taskCount: number;
+        }>;
+    };
+    slack: {
+        available: boolean;
+        /**
+         * `connected`, `inactive` or `not_connected`.
+         */
+        status: string;
+        teamName: string | null;
+        allowExternalSharedChannels: boolean;
+        identity: {
+            slackUserId: string;
+            displayName: string | null;
+        } | null;
+    };
+    telegram: {
+        available: boolean;
+        enabled: boolean;
+    };
+    repos: Array<{
+        id: string;
+        /**
+         * Connected repository in `owner/name` form.
+         */
+        name: string;
+        shortDescription: string;
+        primaryLanguage: string | null;
+        stack: string | null;
+        preprocessing: {
+            overallStatus: string;
+            metadata: {
+                status: string;
+                error: string | null;
+            };
+            label: {
+                status: string;
+                error: string | null;
+            };
+        };
+    }>;
+    /**
+     * `none` without GitHub, `syncing` before its catalog is published, `ready` once published, or `suspended`. An empty repository list while syncing doesn't mean there are no connected repositories.
+     */
+    repoCatalog: string;
+    planStatus: {
+        plan: 'enterprise';
+    } | {
+        plan: 'monthly';
+        /**
+         * Whether your model credentials or a workspace key are configured.
+         */
+        byokConfigured: boolean;
+        capacity: {
+            plan: string;
+            running: number;
+            queued: number;
+        };
+        capacityCatalog: Array<{
+            plan: string;
+            running: number;
+            queued: number;
+            priceUsd: number;
+        }>;
+        subscription: {
+            status: string;
+            currentPeriodEnd: string | null;
+            trialEndsAt: string | null;
+            pastDueSinceAt: string | null;
+            cancelAtPeriodEnd: boolean;
+            endsAt: string | null;
+            actionRequiredHostedInvoiceUrl: string | null;
+            capacityPlan: string | null;
+        } | null;
+    };
+    /**
+     * The workspace's saved model default, or null when unset. Personal and repository overrides aren't included.
+     */
+    defaultModel: {
+        engine: string;
+        model: string;
+        effort?: string;
+    } | null;
+};
+
+export type WorkspaceOwnershipTransferred = {
+    from: {
+        id: string;
+        role: string;
+    };
+    to: {
+        id: string;
+        role: string;
+    };
+};
+
 /**
  * Makes a retry safe. 1 to 128 printable ASCII characters, with no spaces. A request repeated with the same key answers with the first one's result and does the work once; the same key with different content is `409 idempotency_conflict`. Keys belong to the person who sent them: two people using the same key start two tasks or send two messages. The key is also the `messageId` of the message the request sends, which is a start's first message.
  */
 export type IdempotencyKey = string;
+
+export type WorkspaceAccessListData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/access';
+};
+
+export type WorkspaceAccessListErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessListError = WorkspaceAccessListErrors[keyof WorkspaceAccessListErrors];
+
+export type WorkspaceAccessListResponses = {
+    /**
+     * The workspace's access state.
+     */
+    200: WorkspaceAccess;
+};
+
+export type WorkspaceAccessListResponse = WorkspaceAccessListResponses[keyof WorkspaceAccessListResponses];
+
+export type WorkspaceAccessCreateInviteData = {
+    body: WorkspaceInviteCreateRequest;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/invites';
+};
+
+export type WorkspaceAccessCreateInviteErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `illegal_role`: Only member or admin can be granted. Owners cannot be demoted, removed or leave; transfer ownership instead.
+     * - `invalid_body`: Send a valid email and role member or admin.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `already_member`: The invited user is already a workspace member.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `invite_limit`: The workspace or inviter has reached the daily limit for new invitation addresses.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `invite_delivery_failed`: The invitation was saved, but email delivery failed. Resend the invitation to retry.
+     * - `unavailable`: Invitation email delivery is unavailable.
+     */
+    503: Error;
+};
+
+export type WorkspaceAccessCreateInviteError = WorkspaceAccessCreateInviteErrors[keyof WorkspaceAccessCreateInviteErrors];
+
+export type WorkspaceAccessCreateInviteResponses = {
+    /**
+     * The invitation's public metadata.
+     */
+    200: WorkspaceInviteResponse;
+};
+
+export type WorkspaceAccessCreateInviteResponse = WorkspaceAccessCreateInviteResponses[keyof WorkspaceAccessCreateInviteResponses];
+
+export type WorkspaceAccessResendInviteData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The invitation's id, from the workspace access snapshot.
+         */
+        inviteId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/invites/{inviteId}/resend';
+};
+
+export type WorkspaceAccessResendInviteErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `illegal_role`: Only member or admin can be granted. Owners cannot be demoted, removed or leave; transfer ownership instead.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `invite_not_found`: No such invitation in this workspace.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `already_member`: The invited user is already a workspace member.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `invite_limit`: The workspace or inviter has reached the daily limit for new invitation addresses.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `invite_delivery_failed`: The invitation was saved, but email delivery failed. Resend the invitation to retry.
+     * - `unavailable`: Invitation email delivery is unavailable.
+     */
+    503: Error;
+};
+
+export type WorkspaceAccessResendInviteError = WorkspaceAccessResendInviteErrors[keyof WorkspaceAccessResendInviteErrors];
+
+export type WorkspaceAccessResendInviteResponses = {
+    /**
+     * The refreshed invitation's public metadata.
+     */
+    200: WorkspaceInviteResponse;
+};
+
+export type WorkspaceAccessResendInviteResponse = WorkspaceAccessResendInviteResponses[keyof WorkspaceAccessResendInviteResponses];
+
+export type WorkspaceAccessRevokeInviteData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The invitation's id, from the workspace access snapshot.
+         */
+        inviteId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/invites/{inviteId}';
+};
+
+export type WorkspaceAccessRevokeInviteErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `invite_not_found`: No such invitation in this workspace.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Gone. The `error` code says which:
+     *
+     * - `consumed`: The invitation has already been accepted.
+     * - `declined`: The invitation has been declined.
+     * - `expired`: The invitation has expired.
+     * - `invite_revoked`: The invitation has been revoked.
+     * - `revoked`: The invitation has already been revoked.
+     */
+    410: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessRevokeInviteError = WorkspaceAccessRevokeInviteErrors[keyof WorkspaceAccessRevokeInviteErrors];
+
+export type WorkspaceAccessRevokeInviteResponses = {
+    /**
+     * The invitation was revoked.
+     */
+    200: WorkspaceAccessOk;
+};
+
+export type WorkspaceAccessRevokeInviteResponse = WorkspaceAccessRevokeInviteResponses[keyof WorkspaceAccessRevokeInviteResponses];
+
+export type WorkspaceAccessApproveRequestData = {
+    body: WorkspaceGrantRoleRequest;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The access request's id, from the workspace access snapshot.
+         */
+        requestId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/access-requests/{requestId}/approve';
+};
+
+export type WorkspaceAccessApproveRequestErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `illegal_role`: Only member or admin can be granted. Owners cannot be demoted, removed or leave; transfer ownership instead.
+     * - `invalid_body`: Send role member or admin.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     * - `request_not_found`: No such access request in this workspace.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `request_not_pending`: The access request has already been reviewed.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessApproveRequestError = WorkspaceAccessApproveRequestErrors[keyof WorkspaceAccessApproveRequestErrors];
+
+export type WorkspaceAccessApproveRequestResponses = {
+    /**
+     * The reviewed request and granted membership.
+     */
+    200: WorkspaceAccessApproved;
+};
+
+export type WorkspaceAccessApproveRequestResponse = WorkspaceAccessApproveRequestResponses[keyof WorkspaceAccessApproveRequestResponses];
+
+export type WorkspaceAccessDenyRequestData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The access request's id, from the workspace access snapshot.
+         */
+        requestId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/access-requests/{requestId}/deny';
+};
+
+export type WorkspaceAccessDenyRequestErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     * - `request_not_found`: No such access request in this workspace.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `request_not_pending`: The access request has already been reviewed.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessDenyRequestError = WorkspaceAccessDenyRequestErrors[keyof WorkspaceAccessDenyRequestErrors];
+
+export type WorkspaceAccessDenyRequestResponses = {
+    /**
+     * The denied request.
+     */
+    200: WorkspaceAccessDenied;
+};
+
+export type WorkspaceAccessDenyRequestResponse = WorkspaceAccessDenyRequestResponses[keyof WorkspaceAccessDenyRequestResponses];
+
+export type WorkspaceAccessRemoveMemberData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The membership's id, from the workspace access snapshot.
+         */
+        membershipId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/memberships/{membershipId}';
+};
+
+export type WorkspaceAccessRemoveMemberErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `illegal_role`: Only member or admin can be granted. Owners cannot be demoted, removed or leave; transfer ownership instead.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `membership_not_found`: No such membership in this workspace.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessRemoveMemberError = WorkspaceAccessRemoveMemberErrors[keyof WorkspaceAccessRemoveMemberErrors];
+
+export type WorkspaceAccessRemoveMemberResponses = {
+    /**
+     * The member was removed.
+     */
+    200: WorkspaceAccessOk;
+};
+
+export type WorkspaceAccessRemoveMemberResponse = WorkspaceAccessRemoveMemberResponses[keyof WorkspaceAccessRemoveMemberResponses];
+
+export type WorkspaceAccessSetRoleData = {
+    body: WorkspaceGrantRoleRequest;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The membership's id, from the workspace access snapshot.
+         */
+        membershipId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/memberships/{membershipId}';
+};
+
+export type WorkspaceAccessSetRoleErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `illegal_role`: Only member or admin can be granted. Owners cannot be demoted, removed or leave; transfer ownership instead.
+     * - `invalid_body`: Send role member or admin.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `membership_not_found`: No such membership in this workspace.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessSetRoleError = WorkspaceAccessSetRoleErrors[keyof WorkspaceAccessSetRoleErrors];
+
+export type WorkspaceAccessSetRoleResponses = {
+    /**
+     * The updated membership.
+     */
+    200: WorkspaceMembershipResponse;
+};
+
+export type WorkspaceAccessSetRoleResponse = WorkspaceAccessSetRoleResponses[keyof WorkspaceAccessSetRoleResponses];
+
+export type WorkspaceAccessTransferOwnerData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The membership's id, from the workspace access snapshot.
+         */
+        membershipId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/memberships/{membershipId}/transfer';
+};
+
+export type WorkspaceAccessTransferOwnerErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `illegal_role`: Only member or admin can be granted. Owners cannot be demoted, removed or leave; transfer ownership instead.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner can manage workspace access.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `membership_not_found`: No such membership in this workspace.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessTransferOwnerError = WorkspaceAccessTransferOwnerErrors[keyof WorkspaceAccessTransferOwnerErrors];
+
+export type WorkspaceAccessTransferOwnerResponses = {
+    /**
+     * The former and new owner's memberships.
+     */
+    200: WorkspaceOwnershipTransferred;
+};
+
+export type WorkspaceAccessTransferOwnerResponse = WorkspaceAccessTransferOwnerResponses[keyof WorkspaceAccessTransferOwnerResponses];
+
+export type WorkspaceAccessLeaveData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/leave';
+};
+
+export type WorkspaceAccessLeaveErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `illegal_role`: Only member or admin can be granted. Owners cannot be demoted, removed or leave; transfer ownership instead.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `membership_not_found`: No such membership in this workspace.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspaceAccessLeaveError = WorkspaceAccessLeaveErrors[keyof WorkspaceAccessLeaveErrors];
+
+export type WorkspaceAccessLeaveResponses = {
+    /**
+     * The caller left the workspace.
+     */
+    200: WorkspaceAccessOk;
+};
+
+export type WorkspaceAccessLeaveResponse = WorkspaceAccessLeaveResponses[keyof WorkspaceAccessLeaveResponses];
 
 export type MeGetData = {
     body?: never;
@@ -443,7 +1579,7 @@ export type MeGetErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -464,6 +1600,204 @@ export type MeGetResponses = {
 };
 
 export type MeGetResponse = MeGetResponses[keyof MeGetResponses];
+
+export type WorkspacesGetData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}';
+};
+
+export type WorkspacesGetErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspacesGetError = WorkspacesGetErrors[keyof WorkspacesGetErrors];
+
+export type WorkspacesGetResponses = {
+    /**
+     * The member-visible workspace overview.
+     */
+    200: WorkspaceOverview;
+};
+
+export type WorkspacesGetResponse = WorkspacesGetResponses[keyof WorkspacesGetResponses];
+
+export type MeGetAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/me/account';
+};
+
+export type MeGetAccountErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type MeGetAccountError = MeGetAccountErrors[keyof MeGetAccountErrors];
+
+export type MeGetAccountResponses = {
+    /**
+     * Your account and linked identities.
+     */
+    200: Account;
+};
+
+export type MeGetAccountResponse = MeGetAccountResponses[keyof MeGetAccountResponses];
+
+export type MeGetEmailPreferencesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/v1/me/email-preferences';
+};
+
+export type MeGetEmailPreferencesErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The authenticated user's account could not be found.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type MeGetEmailPreferencesError = MeGetEmailPreferencesErrors[keyof MeGetEmailPreferencesErrors];
+
+export type MeGetEmailPreferencesResponses = {
+    /**
+     * Your account-wide email preferences.
+     */
+    200: EmailPreferences;
+};
+
+export type MeGetEmailPreferencesResponse = MeGetEmailPreferencesResponses[keyof MeGetEmailPreferencesResponses];
+
+export type MeUpdateEmailPreferencesData = {
+    body: UpdateEmailPreferencesRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/me/email-preferences';
+};
+
+export type MeUpdateEmailPreferencesErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `invalid_body`: Send at least one of `setupReminders` or `taskAlerts` as a boolean. Other fields, including workspace and user targets, are refused.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The authenticated user's account could not be found.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type MeUpdateEmailPreferencesError = MeUpdateEmailPreferencesErrors[keyof MeUpdateEmailPreferencesErrors];
+
+export type MeUpdateEmailPreferencesResponses = {
+    /**
+     * Your saved preferences, including the unchanged category.
+     */
+    200: EmailPreferences;
+};
+
+export type MeUpdateEmailPreferencesResponse = MeUpdateEmailPreferencesResponses[keyof MeUpdateEmailPreferencesResponses];
 
 export type MeRevokeTokenData = {
     body?: never;
@@ -500,7 +1834,7 @@ export type MeRevokeTokenErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -571,7 +1905,7 @@ export type TasksListErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -659,7 +1993,7 @@ export type TasksCreateErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -719,7 +2053,7 @@ export type TasksGetErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -797,7 +2131,7 @@ export type TasksStopErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -879,7 +2213,7 @@ export type MessagesListErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -966,7 +2300,7 @@ export type MessagesCreateErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -1031,7 +2365,7 @@ export type TicketsSearchErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**
@@ -1124,7 +2458,7 @@ export type TicketsDelegateErrors = {
     /**
      * Too many requests. The `error` code says which:
      *
-     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 write requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
      */
     429: Error;
     /**

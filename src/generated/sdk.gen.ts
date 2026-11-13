@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { MeGetData, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses } from './types.gen';
+import type { MeGetAccountData, MeGetAccountErrors, MeGetAccountResponses, MeGetData, MeGetEmailPreferencesData, MeGetEmailPreferencesErrors, MeGetEmailPreferencesResponses, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, MeUpdateEmailPreferencesData, MeUpdateEmailPreferencesErrors, MeUpdateEmailPreferencesResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses, WorkspaceAccessApproveRequestData, WorkspaceAccessApproveRequestErrors, WorkspaceAccessApproveRequestResponses, WorkspaceAccessCreateInviteData, WorkspaceAccessCreateInviteErrors, WorkspaceAccessCreateInviteResponses, WorkspaceAccessDenyRequestData, WorkspaceAccessDenyRequestErrors, WorkspaceAccessDenyRequestResponses, WorkspaceAccessLeaveData, WorkspaceAccessLeaveErrors, WorkspaceAccessLeaveResponses, WorkspaceAccessListData, WorkspaceAccessListErrors, WorkspaceAccessListResponses, WorkspaceAccessRemoveMemberData, WorkspaceAccessRemoveMemberErrors, WorkspaceAccessRemoveMemberResponses, WorkspaceAccessResendInviteData, WorkspaceAccessResendInviteErrors, WorkspaceAccessResendInviteResponses, WorkspaceAccessRevokeInviteData, WorkspaceAccessRevokeInviteErrors, WorkspaceAccessRevokeInviteResponses, WorkspaceAccessSetRoleData, WorkspaceAccessSetRoleErrors, WorkspaceAccessSetRoleResponses, WorkspaceAccessTransferOwnerData, WorkspaceAccessTransferOwnerErrors, WorkspaceAccessTransferOwnerResponses, WorkspacesGetData, WorkspacesGetErrors, WorkspacesGetResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,6 +19,128 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
+ * List workspace access
+ *
+ * Owner only. Lists members, recent access requests and invitations. Invitation tokens and redemption secrets are never returned.
+ */
+export const workspaceAccessList = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessListData, ThrowOnError>): RequestResult<WorkspaceAccessListResponses, WorkspaceAccessListErrors, ThrowOnError> => (options.client ?? client).get<WorkspaceAccessListResponses, WorkspaceAccessListErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/access',
+    ...options
+});
+
+/**
+ * Invite a workspace member
+ *
+ * Owner only. Saves an email invitation and sends the same invitation email as the dashboard. Grant member or admin, never owner.
+ */
+export const workspaceAccessCreateInvite = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessCreateInviteData, ThrowOnError>): RequestResult<WorkspaceAccessCreateInviteResponses, WorkspaceAccessCreateInviteErrors, ThrowOnError> => (options.client ?? client).post<WorkspaceAccessCreateInviteResponses, WorkspaceAccessCreateInviteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/invites',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Resend an invitation
+ *
+ * Owner only. Refreshes and resends an existing invitation using the dashboard's email flow.
+ */
+export const workspaceAccessResendInvite = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessResendInviteData, ThrowOnError>): RequestResult<WorkspaceAccessResendInviteResponses, WorkspaceAccessResendInviteErrors, ThrowOnError> => (options.client ?? client).post<WorkspaceAccessResendInviteResponses, WorkspaceAccessResendInviteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/invites/{inviteId}/resend',
+    ...options
+});
+
+/**
+ * Revoke an invitation
+ *
+ * Owner only. Revokes an outstanding invitation in this workspace.
+ */
+export const workspaceAccessRevokeInvite = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessRevokeInviteData, ThrowOnError>): RequestResult<WorkspaceAccessRevokeInviteResponses, WorkspaceAccessRevokeInviteErrors, ThrowOnError> => (options.client ?? client).delete<WorkspaceAccessRevokeInviteResponses, WorkspaceAccessRevokeInviteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/invites/{inviteId}',
+    ...options
+});
+
+/**
+ * Approve an access request
+ *
+ * Owner only. Approves a pending access request and grants member or admin.
+ */
+export const workspaceAccessApproveRequest = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessApproveRequestData, ThrowOnError>): RequestResult<WorkspaceAccessApproveRequestResponses, WorkspaceAccessApproveRequestErrors, ThrowOnError> => (options.client ?? client).post<WorkspaceAccessApproveRequestResponses, WorkspaceAccessApproveRequestErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/access-requests/{requestId}/approve',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Deny an access request
+ *
+ * Owner only. Denies a pending access request.
+ */
+export const workspaceAccessDenyRequest = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessDenyRequestData, ThrowOnError>): RequestResult<WorkspaceAccessDenyRequestResponses, WorkspaceAccessDenyRequestErrors, ThrowOnError> => (options.client ?? client).post<WorkspaceAccessDenyRequestResponses, WorkspaceAccessDenyRequestErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/access-requests/{requestId}/deny',
+    ...options
+});
+
+/**
+ * Remove a workspace member
+ *
+ * Owner only. Removes a non-owner membership. Owners cannot be removed.
+ */
+export const workspaceAccessRemoveMember = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessRemoveMemberData, ThrowOnError>): RequestResult<WorkspaceAccessRemoveMemberResponses, WorkspaceAccessRemoveMemberErrors, ThrowOnError> => (options.client ?? client).delete<WorkspaceAccessRemoveMemberResponses, WorkspaceAccessRemoveMemberErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/memberships/{membershipId}',
+    ...options
+});
+
+/**
+ * Change a member's role
+ *
+ * Owner only. Sets a non-owner's role to member or admin. An owner cannot be demoted through this endpoint.
+ */
+export const workspaceAccessSetRole = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessSetRoleData, ThrowOnError>): RequestResult<WorkspaceAccessSetRoleResponses, WorkspaceAccessSetRoleErrors, ThrowOnError> => (options.client ?? client).patch<WorkspaceAccessSetRoleResponses, WorkspaceAccessSetRoleErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/memberships/{membershipId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Transfer workspace ownership
+ *
+ * Owner only. Atomically promotes the target member to owner and demotes the caller to admin. The target must be a different non-owner member.
+ */
+export const workspaceAccessTransferOwner = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessTransferOwnerData, ThrowOnError>): RequestResult<WorkspaceAccessTransferOwnerResponses, WorkspaceAccessTransferOwnerErrors, ThrowOnError> => (options.client ?? client).post<WorkspaceAccessTransferOwnerResponses, WorkspaceAccessTransferOwnerErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/memberships/{membershipId}/transfer',
+    ...options
+});
+
+/**
+ * Leave a workspace
+ *
+ * Any non-owner member can leave. Owners must transfer ownership before leaving.
+ */
+export const workspaceAccessLeave = <ThrowOnError extends boolean = false>(options: Options<WorkspaceAccessLeaveData, ThrowOnError>): RequestResult<WorkspaceAccessLeaveResponses, WorkspaceAccessLeaveErrors, ThrowOnError> => (options.client ?? client).post<WorkspaceAccessLeaveResponses, WorkspaceAccessLeaveErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/leave',
+    ...options
+});
+
+/**
  * Get the token's user
  *
  * Returns the user the token acts as and the workspaces they belong to, ordered by name. Use it to find the workspace ids the other endpoints take.
@@ -27,6 +149,54 @@ export const meGet = <ThrowOnError extends boolean = false>(options?: Options<Me
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/me',
     ...options
+});
+
+/**
+ * Get a workspace overview
+ *
+ * Returns the workspace's dashboard-visible integration state, connected repository catalog, plan status and saved model default, including your role and your own linked integration identity. Any current workspace member can read it. This is read-only: it doesn't reconcile repositories, refresh provider tokens or expose credentials. Unknown workspaces and workspaces you don't belong to both answer `404 not_found`.
+ */
+export const workspacesGet = <ThrowOnError extends boolean = false>(options: Options<WorkspacesGetData, ThrowOnError>): RequestResult<WorkspacesGetResponses, WorkspacesGetErrors, ThrowOnError> => (options.client ?? client).get<WorkspacesGetResponses, WorkspacesGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}',
+    ...options
+});
+
+/**
+ * Read your account
+ *
+ * Combines your dashboard profile, memberships and linked accounts. Only dashboard-visible fields are returned; credentials, session metadata and hidden provider identities are omitted. No workspace membership is required; this always reads the token's user, never another user.
+ */
+export const meGetAccount = <ThrowOnError extends boolean = false>(options?: Options<MeGetAccountData, ThrowOnError>): RequestResult<MeGetAccountResponses, MeGetAccountErrors, ThrowOnError> => (options?.client ?? client).get<MeGetAccountResponses, MeGetAccountErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/me/account',
+    ...options
+});
+
+/**
+ * Read your email preferences
+ *
+ * Reads the token user's setup reminders and task alerts preferences. These settings apply across all of your workspaces and use the same store as the signed email-preferences page. No workspace membership is required.
+ */
+export const meGetEmailPreferences = <ThrowOnError extends boolean = false>(options?: Options<MeGetEmailPreferencesData, ThrowOnError>): RequestResult<MeGetEmailPreferencesResponses, MeGetEmailPreferencesErrors, ThrowOnError> => (options?.client ?? client).get<MeGetEmailPreferencesResponses, MeGetEmailPreferencesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/me/email-preferences',
+    ...options
+});
+
+/**
+ * Change your email preferences
+ *
+ * Sets at least one of setupReminders or taskAlerts, as JSON booleans. Omitted categories stay unchanged. true subscribes and false opts out. No workspace membership is required. Only the token user's preferences can be changed. The signed email-preferences page reads and writes the same settings.
+ */
+export const meUpdateEmailPreferences = <ThrowOnError extends boolean = false>(options: Options<MeUpdateEmailPreferencesData, ThrowOnError>): RequestResult<MeUpdateEmailPreferencesResponses, MeUpdateEmailPreferencesErrors, ThrowOnError> => (options.client ?? client).patch<MeUpdateEmailPreferencesResponses, MeUpdateEmailPreferencesErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/me/email-preferences',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
