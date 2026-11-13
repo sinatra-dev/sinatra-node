@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { MeGetAccountData, MeGetAccountErrors, MeGetAccountResponses, MeGetData, MeGetEmailPreferencesData, MeGetEmailPreferencesErrors, MeGetEmailPreferencesResponses, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, MeUpdateEmailPreferencesData, MeUpdateEmailPreferencesErrors, MeUpdateEmailPreferencesResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses, WorkspaceAccessApproveRequestData, WorkspaceAccessApproveRequestErrors, WorkspaceAccessApproveRequestResponses, WorkspaceAccessCreateInviteData, WorkspaceAccessCreateInviteErrors, WorkspaceAccessCreateInviteResponses, WorkspaceAccessDenyRequestData, WorkspaceAccessDenyRequestErrors, WorkspaceAccessDenyRequestResponses, WorkspaceAccessLeaveData, WorkspaceAccessLeaveErrors, WorkspaceAccessLeaveResponses, WorkspaceAccessListData, WorkspaceAccessListErrors, WorkspaceAccessListResponses, WorkspaceAccessRemoveMemberData, WorkspaceAccessRemoveMemberErrors, WorkspaceAccessRemoveMemberResponses, WorkspaceAccessResendInviteData, WorkspaceAccessResendInviteErrors, WorkspaceAccessResendInviteResponses, WorkspaceAccessRevokeInviteData, WorkspaceAccessRevokeInviteErrors, WorkspaceAccessRevokeInviteResponses, WorkspaceAccessSetRoleData, WorkspaceAccessSetRoleErrors, WorkspaceAccessSetRoleResponses, WorkspaceAccessTransferOwnerData, WorkspaceAccessTransferOwnerErrors, WorkspaceAccessTransferOwnerResponses, WorkspacesGetData, WorkspacesGetErrors, WorkspacesGetResponses } from './types.gen';
+import type { BillingCheckoutData, BillingCheckoutErrors, BillingCheckoutResponses, BillingPortalData, BillingPortalErrors, BillingPortalResponses, BillingStatusData, BillingStatusErrors, BillingStatusResponses, IntegrationsConnectData, IntegrationsConnectErrors, IntegrationsConnectResponses, MeGetAccountData, MeGetAccountErrors, MeGetAccountResponses, MeGetData, MeGetEmailPreferencesData, MeGetEmailPreferencesErrors, MeGetEmailPreferencesResponses, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, MeUpdateEmailPreferencesData, MeUpdateEmailPreferencesErrors, MeUpdateEmailPreferencesResponses, ReposClearOverrideData, ReposClearOverrideErrors, ReposClearOverrideResponses, ReposDeleteSecretData, ReposDeleteSecretErrors, ReposDeleteSecretResponses, ReposGetCapabilityRequestsData, ReposGetCapabilityRequestsErrors, ReposGetCapabilityRequestsResponses, ReposGetConfigData, ReposGetConfigErrors, ReposGetConfigResponses, ReposGetEnvironmentData, ReposGetEnvironmentErrors, ReposGetEnvironmentResponses, ReposListSecretsData, ReposListSecretsErrors, ReposListSecretsResponses, ReposPatchSecretData, ReposPatchSecretErrors, ReposPatchSecretResponses, ReposPreflightData, ReposPreflightErrors, ReposPreflightResponses, ReposPutSecretData, ReposPutSecretErrors, ReposPutSecretResponses, ReposSetOverrideData, ReposSetOverrideErrors, ReposSetOverrideResponses, SubscriptionsCompleteData, SubscriptionsCompleteErrors, SubscriptionsCompleteResponses, SubscriptionsListData, SubscriptionsListErrors, SubscriptionsListResponses, SubscriptionsPollData, SubscriptionsPollErrors, SubscriptionsPollResponses, SubscriptionsRemoveData, SubscriptionsRemoveErrors, SubscriptionsRemoveResponses, SubscriptionsStartData, SubscriptionsStartErrors, SubscriptionsStartResponses, SubscriptionsUpdateData, SubscriptionsUpdateErrors, SubscriptionsUpdateResponses, SubscriptionsUsageData, SubscriptionsUsageErrors, SubscriptionsUsageResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses, WorkspaceAccessApproveRequestData, WorkspaceAccessApproveRequestErrors, WorkspaceAccessApproveRequestResponses, WorkspaceAccessCreateInviteData, WorkspaceAccessCreateInviteErrors, WorkspaceAccessCreateInviteResponses, WorkspaceAccessDenyRequestData, WorkspaceAccessDenyRequestErrors, WorkspaceAccessDenyRequestResponses, WorkspaceAccessLeaveData, WorkspaceAccessLeaveErrors, WorkspaceAccessLeaveResponses, WorkspaceAccessListData, WorkspaceAccessListErrors, WorkspaceAccessListResponses, WorkspaceAccessRemoveMemberData, WorkspaceAccessRemoveMemberErrors, WorkspaceAccessRemoveMemberResponses, WorkspaceAccessResendInviteData, WorkspaceAccessResendInviteErrors, WorkspaceAccessResendInviteResponses, WorkspaceAccessRevokeInviteData, WorkspaceAccessRevokeInviteErrors, WorkspaceAccessRevokeInviteResponses, WorkspaceAccessSetRoleData, WorkspaceAccessSetRoleErrors, WorkspaceAccessSetRoleResponses, WorkspaceAccessTransferOwnerData, WorkspaceAccessTransferOwnerErrors, WorkspaceAccessTransferOwnerResponses, WorkspaceModelsAddKeyData, WorkspaceModelsAddKeyErrors, WorkspaceModelsAddKeyResponses, WorkspaceModelsClearDefaultData, WorkspaceModelsClearDefaultErrors, WorkspaceModelsClearDefaultResponses, WorkspaceModelsGetDefaultData, WorkspaceModelsGetDefaultErrors, WorkspaceModelsGetDefaultResponses, WorkspaceModelsListKeysData, WorkspaceModelsListKeysErrors, WorkspaceModelsListKeysResponses, WorkspaceModelsRemoveKeyData, WorkspaceModelsRemoveKeyErrors, WorkspaceModelsRemoveKeyResponses, WorkspaceModelsSetDefaultData, WorkspaceModelsSetDefaultErrors, WorkspaceModelsSetDefaultResponses, WorkspacesGetData, WorkspacesGetErrors, WorkspacesGetResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,258 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Read repository configuration
+ *
+ * Returns the repository file, effective configuration, provenance and your own override. Repository data is cached for 60 seconds; personal overrides are never shared between users. GitHub fetch failures return degraded defaults with fetchError.
+ */
+export const reposGetConfig = <ThrowOnError extends boolean = false>(options: Options<ReposGetConfigData, ThrowOnError>): RequestResult<ReposGetConfigResponses, ReposGetConfigErrors, ThrowOnError> => (options.client ?? client).get<ReposGetConfigResponses, ReposGetConfigErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/sinatrarc',
+    ...options
+});
+
+/**
+ * Preflight a repository override
+ *
+ * Checks an unsaved personal override against the same repository configuration and your credential inventory used by the dashboard. Does not persist changes.
+ */
+export const reposPreflight = <ThrowOnError extends boolean = false>(options: Options<ReposPreflightData, ThrowOnError>): RequestResult<ReposPreflightResponses, ReposPreflightErrors, ThrowOnError> => (options.client ?? client).post<ReposPreflightResponses, ReposPreflightErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/config-preflight',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Clear your repository override
+ *
+ * Removes only the authenticated user's override. Idempotent when no override exists.
+ */
+export const reposClearOverride = <ThrowOnError extends boolean = false>(options: Options<ReposClearOverrideData, ThrowOnError>): RequestResult<ReposClearOverrideResponses, ReposClearOverrideErrors, ThrowOnError> => (options.client ?? client).delete<ReposClearOverrideResponses, ReposClearOverrideErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/user-override',
+    ...options
+});
+
+/**
+ * Save your repository override
+ *
+ * Replaces only the authenticated user's override for this repository. Any workspace member can set their own override, never another person's.
+ */
+export const reposSetOverride = <ThrowOnError extends boolean = false>(options: Options<ReposSetOverrideData, ThrowOnError>): RequestResult<ReposSetOverrideResponses, ReposSetOverrideErrors, ThrowOnError> => (options.client ?? client).put<ReposSetOverrideResponses, ReposSetOverrideErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/user-override',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List repository secret metadata
+ *
+ * Workspace members can read secret names and proxy metadata. No values, masked suffixes, ciphertext or wrapped keys are returned. MCP accepts no secret values; use its dashboard handoff instead.
+ */
+export const reposListSecrets = <ThrowOnError extends boolean = false>(options: Options<ReposListSecretsData, ThrowOnError>): RequestResult<ReposListSecretsResponses, ReposListSecretsErrors, ThrowOnError> => (options.client ?? client).get<ReposListSecretsResponses, ReposListSecretsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/secrets',
+    ...options
+});
+
+/**
+ * Delete a repository secret
+ *
+ * Owners and admins can delete the secret and its proxy credential binding. An absent secret returns 404.
+ */
+export const reposDeleteSecret = <ThrowOnError extends boolean = false>(options: Options<ReposDeleteSecretData, ThrowOnError>): RequestResult<ReposDeleteSecretResponses, ReposDeleteSecretErrors, ThrowOnError> => (options.client ?? client).delete<ReposDeleteSecretResponses, ReposDeleteSecretErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/secrets/{name}',
+    ...options
+});
+
+/**
+ * Edit repository secret proxy metadata
+ *
+ * Owners and admins can edit allowed hosts, header and prefix without changing or reading the stored value. At least one field is required.
+ */
+export const reposPatchSecret = <ThrowOnError extends boolean = false>(options: Options<ReposPatchSecretData, ThrowOnError>): RequestResult<ReposPatchSecretResponses, ReposPatchSecretErrors, ThrowOnError> => (options.client ?? client).patch<ReposPatchSecretResponses, ReposPatchSecretErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/secrets/{name}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create or rotate a repository secret
+ *
+ * Owners and admins can supply a secret. Creation requires allowed hosts; on rotation omitted proxy fields retain their stored values. A capabilityRequestId requires repository environments and matching allowed hosts. The value is encrypted and never returned.
+ */
+export const reposPutSecret = <ThrowOnError extends boolean = false>(options: Options<ReposPutSecretData, ThrowOnError>): RequestResult<ReposPutSecretResponses, ReposPutSecretErrors, ThrowOnError> => (options.client ?? client).put<ReposPutSecretResponses, ReposPutSecretErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/secrets/{name}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Read repository environment status
+ *
+ * Members can read environment versions and saved update status. Requires repository environments to be enabled for the workspace.
+ */
+export const reposGetEnvironment = <ThrowOnError extends boolean = false>(options: Options<ReposGetEnvironmentData, ThrowOnError>): RequestResult<ReposGetEnvironmentResponses, ReposGetEnvironmentErrors, ThrowOnError> => (options.client ?? client).get<ReposGetEnvironmentResponses, ReposGetEnvironmentErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/environment',
+    ...options
+});
+
+/**
+ * List repository capability requests
+ *
+ * Members can inspect capability requests and their verification state. Requires repository environments to be enabled for the workspace.
+ */
+export const reposGetCapabilityRequests = <ThrowOnError extends boolean = false>(options: Options<ReposGetCapabilityRequestsData, ThrowOnError>): RequestResult<ReposGetCapabilityRequestsResponses, ReposGetCapabilityRequestsErrors, ThrowOnError> => (options.client ?? client).get<ReposGetCapabilityRequestsResponses, ReposGetCapabilityRequestsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/capability-requests',
+    ...options
+});
+
+/**
+ * Get an integration browser handoff
+ *
+ * Returns only a Sinatra dashboard URL. Open it in a browser and sign in to complete authorization through the existing dashboard flow. GitHub, Linear and Slack require a current workspace owner or admin; Telegram links your personal account and is available to members when its rollout allows it. This request never starts OAuth, creates state or returns credentials. Poll `GET /v1/workspaces/{workspaceId}` afterward: `github.status`, `linear.status` and `slack.status` describe workspace connections; `telegram.connected` describes your personal account link, independently of `telegram.enabled`.
+ */
+export const integrationsConnect = <ThrowOnError extends boolean = false>(options: Options<IntegrationsConnectData, ThrowOnError>): RequestResult<IntegrationsConnectResponses, IntegrationsConnectErrors, ThrowOnError> => (options.client ?? client).get<IntegrationsConnectResponses, IntegrationsConnectErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/integrations/{integration}/connect',
+    ...options
+});
+
+/**
+ * Clear the workspace model default
+ *
+ * Owner only. Removes the workspace selection so tasks without another default use automatic credential-based selection.
+ */
+export const workspaceModelsClearDefault = <ThrowOnError extends boolean = false>(options: Options<WorkspaceModelsClearDefaultData, ThrowOnError>): RequestResult<WorkspaceModelsClearDefaultResponses, WorkspaceModelsClearDefaultErrors, ThrowOnError> => (options.client ?? client).delete<WorkspaceModelsClearDefaultResponses, WorkspaceModelsClearDefaultErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/model-default',
+    ...options
+});
+
+/**
+ * Read the workspace model default
+ *
+ * Any current workspace member can read the engine, model and optional effort used when no personal default overrides it.
+ */
+export const workspaceModelsGetDefault = <ThrowOnError extends boolean = false>(options: Options<WorkspaceModelsGetDefaultData, ThrowOnError>): RequestResult<WorkspaceModelsGetDefaultResponses, WorkspaceModelsGetDefaultErrors, ThrowOnError> => (options.client ?? client).get<WorkspaceModelsGetDefaultResponses, WorkspaceModelsGetDefaultErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/model-default',
+    ...options
+});
+
+/**
+ * Set the workspace model default
+ *
+ * Owner only. Saves a catalog-supported engine, model and optional effort using the same selection rules as the dashboard.
+ */
+export const workspaceModelsSetDefault = <ThrowOnError extends boolean = false>(options: Options<WorkspaceModelsSetDefaultData, ThrowOnError>): RequestResult<WorkspaceModelsSetDefaultResponses, WorkspaceModelsSetDefaultErrors, ThrowOnError> => (options.client ?? client).put<WorkspaceModelsSetDefaultResponses, WorkspaceModelsSetDefaultErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/model-default',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List configured workspace model keys
+ *
+ * Any current workspace member can list configured providers. Never returns API keys, encrypted material or key suffixes.
+ */
+export const workspaceModelsListKeys = <ThrowOnError extends boolean = false>(options: Options<WorkspaceModelsListKeysData, ThrowOnError>): RequestResult<WorkspaceModelsListKeysResponses, WorkspaceModelsListKeysErrors, ThrowOnError> => (options.client ?? client).get<WorkspaceModelsListKeysResponses, WorkspaceModelsListKeysErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/model-credentials',
+    ...options
+});
+
+/**
+ * Add or replace a workspace model key
+ *
+ * Owner or admin only. Validates an Anthropic or OpenRouter API key, encrypts it and replaces any existing key for that provider. No part of the key is returned.
+ */
+export const workspaceModelsAddKey = <ThrowOnError extends boolean = false>(options: Options<WorkspaceModelsAddKeyData, ThrowOnError>): RequestResult<WorkspaceModelsAddKeyResponses, WorkspaceModelsAddKeyErrors, ThrowOnError> => (options.client ?? client).post<WorkspaceModelsAddKeyResponses, WorkspaceModelsAddKeyErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/model-credentials',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Remove a workspace model key
+ *
+ * Owner or admin only. Deletes this workspace's key for the provider without exposing any key material.
+ */
+export const workspaceModelsRemoveKey = <ThrowOnError extends boolean = false>(options: Options<WorkspaceModelsRemoveKeyData, ThrowOnError>): RequestResult<WorkspaceModelsRemoveKeyResponses, WorkspaceModelsRemoveKeyErrors, ThrowOnError> => (options.client ?? client).delete<WorkspaceModelsRemoveKeyResponses, WorkspaceModelsRemoveKeyErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/model-credentials/{provider}',
+    ...options
+});
+
+/**
+ * Get workspace billing status
+ *
+ * Any current workspace member can read the same plan, capacity, own-credentials availability and subscription state shown in dashboard settings. Enterprise workspaces return only their plan. No Stripe identifiers or credential material are returned.
+ */
+export const billingStatus = <ThrowOnError extends boolean = false>(options: Options<BillingStatusData, ThrowOnError>): RequestResult<BillingStatusResponses, BillingStatusErrors, ThrowOnError> => (options.client ?? client).get<BillingStatusResponses, BillingStatusErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/plan-status',
+    ...options
+});
+
+/**
+ * Create a checkout URL
+ *
+ * Owner only. Creates a Stripe-hosted checkout for a Pro, Team or Scale capacity plan. Open the returned URL to complete payment. An active or trialing subscription must be managed through the portal instead.
+ */
+export const billingCheckout = <ThrowOnError extends boolean = false>(options: Options<BillingCheckoutData, ThrowOnError>): RequestResult<BillingCheckoutResponses, BillingCheckoutErrors, ThrowOnError> => (options.client ?? client).post<BillingCheckoutResponses, BillingCheckoutErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/billing/checkout',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Create a billing portal URL
+ *
+ * Owner only. Creates a Stripe-hosted billing portal URL to manage the workspace's existing subscription, payment methods and invoices.
+ */
+export const billingPortal = <ThrowOnError extends boolean = false>(options: Options<BillingPortalData, ThrowOnError>): RequestResult<BillingPortalResponses, BillingPortalErrors, ThrowOnError> => (options.client ?? client).post<BillingPortalResponses, BillingPortalErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/billing/portal',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * List workspace access
@@ -344,6 +596,95 @@ export const ticketsSearch = <ThrowOnError extends boolean = false>(options: Opt
 export const ticketsDelegate = <ThrowOnError extends boolean = false>(options: Options<TicketsDelegateData, ThrowOnError>): RequestResult<TicketsDelegateResponses, TicketsDelegateErrors, ThrowOnError> => (options.client ?? client).post<TicketsDelegateResponses, TicketsDelegateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/workspaces/{workspaceId}/tickets/delegate',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * List your subscriptions
+ *
+ * Acts only on your own subscriptions in this workspace, not another member's. Use a personal API token or an OAuth access token issued for the REST API; MCP-audience tokens are rejected. Lists Codex, Claude, xAI and Cursor connections including reconnect status. Primary selection is per provider.
+ */
+export const subscriptionsList = <ThrowOnError extends boolean = false>(options: Options<SubscriptionsListData, ThrowOnError>): RequestResult<SubscriptionsListResponses, SubscriptionsListErrors, ThrowOnError> => (options.client ?? client).get<SubscriptionsListResponses, SubscriptionsListErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/subscriptions',
+    ...options
+});
+
+/**
+ * Get subscription usage
+ *
+ * Acts only on your own subscriptions in this workspace, not another member's. Use a personal API token or an OAuth access token issued for the REST API; MCP-audience tokens are rejected. Fetches live usage for the connection's provider. Codex and Claude report cap windows, xAI reports allowances and products, and Cursor reports labeled windows. Provider-omitted values remain absent.
+ */
+export const subscriptionsUsage = <ThrowOnError extends boolean = false>(options: Options<SubscriptionsUsageData, ThrowOnError>): RequestResult<SubscriptionsUsageResponses, SubscriptionsUsageErrors, ThrowOnError> => (options.client ?? client).get<SubscriptionsUsageResponses, SubscriptionsUsageErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/subscriptions/{connectionId}/usage',
+    ...options
+});
+
+/**
+ * Disconnect a subscription
+ *
+ * Acts only on your own subscriptions in this workspace, not another member's. Use a personal API token or an OAuth access token issued for the REST API; MCP-audience tokens are rejected. Deletes this connection so it can no longer be used for your tasks.
+ */
+export const subscriptionsRemove = <ThrowOnError extends boolean = false>(options: Options<SubscriptionsRemoveData, ThrowOnError>): RequestResult<SubscriptionsRemoveResponses, SubscriptionsRemoveErrors, ThrowOnError> => (options.client ?? client).delete<SubscriptionsRemoveResponses, SubscriptionsRemoveErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/subscriptions/{connectionId}',
+    ...options
+});
+
+/**
+ * Update a subscription
+ *
+ * Acts only on your own subscriptions in this workspace, not another member's. Use a personal API token or an OAuth access token issued for the REST API; MCP-audience tokens are rejected. Changes a connection's label or makes it primary for its provider. Other providers' primary connections are unaffected.
+ */
+export const subscriptionsUpdate = <ThrowOnError extends boolean = false>(options: Options<SubscriptionsUpdateData, ThrowOnError>): RequestResult<SubscriptionsUpdateResponses, SubscriptionsUpdateErrors, ThrowOnError> => (options.client ?? client).patch<SubscriptionsUpdateResponses, SubscriptionsUpdateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/subscriptions/{connectionId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Start connecting a subscription
+ *
+ * Acts only on your own subscriptions in this workspace, not another member's. Use a personal API token or an OAuth access token issued for the REST API; MCP-audience tokens are rejected. Provider must be `codex`, `claude`, `xai` or `cursor`. Takes no body. Codex and xAI return a device code and verification URL; Cursor returns a login URL. Keep the poll token and poll at the returned interval in seconds. Claude returns an authorization URL, state and pending token; open the URL and submit the resulting code to `/claude/complete`. Continuation tokens are opaque, short-lived and bound to you and this workspace; keep them private. No browser cookies are required.
+ */
+export const subscriptionsStart = <ThrowOnError extends boolean = false>(options: Options<SubscriptionsStartData, ThrowOnError>): RequestResult<SubscriptionsStartResponses, SubscriptionsStartErrors, ThrowOnError> => (options.client ?? client).post<SubscriptionsStartResponses, SubscriptionsStartErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/subscriptions/{provider}/start',
+    ...options
+});
+
+/**
+ * Poll subscription authorization
+ *
+ * Acts only on your own subscriptions in this workspace, not another member's. Use a personal API token or an OAuth access token issued for the REST API; MCP-audience tokens are rejected. Provider must be `codex`, `xai` or `cursor`; Claude uses `/claude/complete`. Send the unchanged poll token from start, plus `deviceAuthId` and `userCode` for Codex or `deviceCode` for xAI. Cursor needs only `pollToken`. Keep polling `pending` at the start interval. `connected` means credentials were saved server-side. HTTP 400 can terminate polling with `status: denied`, `status: expired` (xAI), or `status: failed` and `error: save_failed` (Codex). Stop polling on terminal statuses.
+ */
+export const subscriptionsPoll = <ThrowOnError extends boolean = false>(options: Options<SubscriptionsPollData, ThrowOnError>): RequestResult<SubscriptionsPollResponses, SubscriptionsPollErrors, ThrowOnError> => (options.client ?? client).post<SubscriptionsPollResponses, SubscriptionsPollErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/subscriptions/{provider}/poll',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Complete Claude authorization
+ *
+ * Acts only on your own subscriptions in this workspace, not another member's. Use a personal API token or an OAuth access token issued for the REST API; MCP-audience tokens are rejected. Exchanges the pasted Claude authorization code using the state and pending token returned by start. Credentials are stored server-side and never returned.
+ */
+export const subscriptionsComplete = <ThrowOnError extends boolean = false>(options: Options<SubscriptionsCompleteData, ThrowOnError>): RequestResult<SubscriptionsCompleteResponses, SubscriptionsCompleteErrors, ThrowOnError> => (options.client ?? client).post<SubscriptionsCompleteResponses, SubscriptionsCompleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/subscriptions/claude/complete',
     ...options,
     headers: {
         'Content-Type': 'application/json',
