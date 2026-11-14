@@ -143,6 +143,26 @@ export type CreateTaskResponse = {
 };
 
 /**
+ * The workspace to create.
+ */
+export type CreateWorkspaceRequest = {
+    /**
+     * The workspace's name. Surrounding spaces are trimmed and runs of spaces become one; what remains must be 1 to 120 letters, numbers, spaces and basic punctuation, with no web address or email address.
+     */
+    name: string;
+};
+
+/**
+ * The workspace you created.
+ */
+export type CreateWorkspaceResponse = {
+    /**
+     * The new workspace. You are its owner.
+     */
+    workspace: Workspace;
+};
+
+/**
  * A GitHub issue to delegate, by its repository and number.
  */
 export type DelegateGithubTicket = {
@@ -212,7 +232,7 @@ export type EmailPreferences = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
      */
     error: string;
     /**
@@ -369,6 +389,8 @@ export type RepoCapabilityRequests = {
         notifiedGeneration: number;
         notifiedRecipientIds: Array<string>;
         notificationBatchKeys: Array<string>;
+        lastReportedAt: string | null;
+        expiredAt: string | null;
         createdAt: string;
         updatedAt: string;
     }>;
@@ -459,6 +481,21 @@ export type RepoEnvironment = {
         createdAt: string;
         finishedAt: string | null;
     }>;
+};
+
+export type RepoExternalPrReviews = {
+    reviewExternalPrs: 'inherit' | 'on' | 'off';
+    /**
+     * The effective setting after applying the repository override to the workspace default.
+     */
+    enabled: boolean;
+};
+
+export type RepoExternalPrReviewsRequest = {
+    /**
+     * inherit uses the workspace default; on and off override it. Defaults to inherit.
+     */
+    reviewExternalPrs: 'inherit' | 'on' | 'off';
 };
 
 export type RepoOverrideRequest = {
@@ -747,6 +784,13 @@ export type WorkspaceAccessDenied = {
 
 export type WorkspaceAccessOk = {
     ok: true;
+};
+
+export type WorkspaceExternalPrReviews = {
+    /**
+     * The workspace default for external pull request reviews. Defaults to false.
+     */
+    reviewExternalPrs: boolean;
 };
 
 export type WorkspaceGrantRoleRequest = {
@@ -1931,7 +1975,7 @@ export type IntegrationsConnectErrors = {
      *
      * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
      * - `slack_disabled`: Slack connections are disabled on this deployment.
-     * - `telegram_unavailable`: Telegram Login is not configured or its rollout does not allow this user.
+     * - `telegram_unavailable`: Telegram Login is not configured.
      */
     404: Error;
     /**
@@ -2380,6 +2424,266 @@ export type WorkspaceModelsRemoveKeyResponses = {
 };
 
 export type WorkspaceModelsRemoveKeyResponse = WorkspaceModelsRemoveKeyResponses[keyof WorkspaceModelsRemoveKeyResponses];
+
+export type WorkspacesGetReviewExternalPrsData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/review-external-prs';
+};
+
+export type WorkspacesGetReviewExternalPrsErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspacesGetReviewExternalPrsError = WorkspacesGetReviewExternalPrsErrors[keyof WorkspacesGetReviewExternalPrsErrors];
+
+export type WorkspacesGetReviewExternalPrsResponses = {
+    /**
+     * The workspace default, initially false.
+     */
+    200: WorkspaceExternalPrReviews;
+};
+
+export type WorkspacesGetReviewExternalPrsResponse = WorkspacesGetReviewExternalPrsResponses[keyof WorkspacesGetReviewExternalPrsResponses];
+
+export type WorkspacesSetReviewExternalPrsData = {
+    body: WorkspaceExternalPrReviews;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/review-external-prs';
+};
+
+export type WorkspacesSetReviewExternalPrsErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `invalid_body`: The body doesn't name an issue. Send `source` with `id` for Linear, or with `repo` and `number` for GitHub, as JSON with `Content-Type: application/json`.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Your workspace role can't do this.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspacesSetReviewExternalPrsError = WorkspacesSetReviewExternalPrsErrors[keyof WorkspacesSetReviewExternalPrsErrors];
+
+export type WorkspacesSetReviewExternalPrsResponses = {
+    /**
+     * The saved workspace default.
+     */
+    200: WorkspaceExternalPrReviews;
+};
+
+export type WorkspacesSetReviewExternalPrsResponse = WorkspacesSetReviewExternalPrsResponses[keyof WorkspacesSetReviewExternalPrsResponses];
+
+export type RepositoriesGetReviewExternalPrsData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The repository id from the repos data in GET /v1/workspaces/{workspaceId}.
+         */
+        repoId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/review-external-prs';
+};
+
+export type RepositoriesGetReviewExternalPrsErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     * - `repo_not_found`: The repository does not exist in this workspace.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type RepositoriesGetReviewExternalPrsError = RepositoriesGetReviewExternalPrsErrors[keyof RepositoriesGetReviewExternalPrsErrors];
+
+export type RepositoriesGetReviewExternalPrsResponses = {
+    /**
+     * The repository setting and resolved value.
+     */
+    200: RepoExternalPrReviews;
+};
+
+export type RepositoriesGetReviewExternalPrsResponse = RepositoriesGetReviewExternalPrsResponses[keyof RepositoriesGetReviewExternalPrsResponses];
+
+export type RepositoriesSetReviewExternalPrsData = {
+    body: RepoExternalPrReviewsRequest;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The repository id from the repos data in GET /v1/workspaces/{workspaceId}.
+         */
+        repoId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/review-external-prs';
+};
+
+export type RepositoriesSetReviewExternalPrsErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `invalid_body`: The body doesn't name an issue. Send `source` with `id` for Linear, or with `repo` and `number` for GitHub, as JSON with `Content-Type: application/json`.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Your workspace role can't do this.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     * - `repo_not_found`: The repository does not exist in this workspace.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type RepositoriesSetReviewExternalPrsError = RepositoriesSetReviewExternalPrsErrors[keyof RepositoriesSetReviewExternalPrsErrors];
+
+export type RepositoriesSetReviewExternalPrsResponses = {
+    /**
+     * The saved repository setting and resolved value.
+     */
+    200: RepoExternalPrReviews;
+};
+
+export type RepositoriesSetReviewExternalPrsResponse = RepositoriesSetReviewExternalPrsResponses[keyof RepositoriesSetReviewExternalPrsResponses];
 
 export type BillingStatusData = {
     body?: never;
@@ -3473,6 +3777,71 @@ export type MeGetResponses = {
 };
 
 export type MeGetResponse = MeGetResponses[keyof MeGetResponses];
+
+export type WorkspacesCreateData = {
+    body: CreateWorkspaceRequest;
+    path?: never;
+    query?: never;
+    url: '/v1/workspaces';
+};
+
+export type WorkspacesCreateErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `invalid_body`: The body has a field other than `name`, or isn't a JSON object.
+     * - `invalid_name`: `name` is missing, empty or over 120 characters, uses characters other than letters, numbers, spaces and basic punctuation, or looks like a web address. `reason` states the rules.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `workspace_limit`: You already created a workspace without GitHub, and each person can create one that way, whether or not it has since been connected to GitHub. Use that workspace (`GET /v1/me` lists it), connecting GitHub to it with `GET /v1/workspaces/{workspaceId}/integrations/github/connect` if it isn't yet. To make another workspace, install the Sinatra GitHub App on another account or organization from the dashboard's Add a workspace.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type WorkspacesCreateError = WorkspacesCreateErrors[keyof WorkspacesCreateErrors];
+
+export type WorkspacesCreateResponses = {
+    /**
+     * Created. You are the workspace's owner.
+     */
+    201: CreateWorkspaceResponse;
+};
+
+export type WorkspacesCreateResponse = WorkspacesCreateResponses[keyof WorkspacesCreateResponses];
 
 export type WorkspacesGetData = {
     body?: never;

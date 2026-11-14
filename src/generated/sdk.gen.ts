@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BillingCheckoutData, BillingCheckoutErrors, BillingCheckoutResponses, BillingPortalData, BillingPortalErrors, BillingPortalResponses, BillingStatusData, BillingStatusErrors, BillingStatusResponses, IntegrationsConnectData, IntegrationsConnectErrors, IntegrationsConnectResponses, MeGetAccountData, MeGetAccountErrors, MeGetAccountResponses, MeGetData, MeGetEmailPreferencesData, MeGetEmailPreferencesErrors, MeGetEmailPreferencesResponses, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, MeUpdateEmailPreferencesData, MeUpdateEmailPreferencesErrors, MeUpdateEmailPreferencesResponses, ReposClearOverrideData, ReposClearOverrideErrors, ReposClearOverrideResponses, ReposDeleteSecretData, ReposDeleteSecretErrors, ReposDeleteSecretResponses, ReposGetCapabilityRequestsData, ReposGetCapabilityRequestsErrors, ReposGetCapabilityRequestsResponses, ReposGetConfigData, ReposGetConfigErrors, ReposGetConfigResponses, ReposGetEnvironmentData, ReposGetEnvironmentErrors, ReposGetEnvironmentResponses, ReposListSecretsData, ReposListSecretsErrors, ReposListSecretsResponses, ReposPatchSecretData, ReposPatchSecretErrors, ReposPatchSecretResponses, ReposPreflightData, ReposPreflightErrors, ReposPreflightResponses, ReposPutSecretData, ReposPutSecretErrors, ReposPutSecretResponses, ReposSetOverrideData, ReposSetOverrideErrors, ReposSetOverrideResponses, SubscriptionsCompleteData, SubscriptionsCompleteErrors, SubscriptionsCompleteResponses, SubscriptionsListData, SubscriptionsListErrors, SubscriptionsListResponses, SubscriptionsPollData, SubscriptionsPollErrors, SubscriptionsPollResponses, SubscriptionsRemoveData, SubscriptionsRemoveErrors, SubscriptionsRemoveResponses, SubscriptionsStartData, SubscriptionsStartErrors, SubscriptionsStartResponses, SubscriptionsUpdateData, SubscriptionsUpdateErrors, SubscriptionsUpdateResponses, SubscriptionsUsageData, SubscriptionsUsageErrors, SubscriptionsUsageResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses, WorkspaceAccessApproveRequestData, WorkspaceAccessApproveRequestErrors, WorkspaceAccessApproveRequestResponses, WorkspaceAccessCreateInviteData, WorkspaceAccessCreateInviteErrors, WorkspaceAccessCreateInviteResponses, WorkspaceAccessDenyRequestData, WorkspaceAccessDenyRequestErrors, WorkspaceAccessDenyRequestResponses, WorkspaceAccessLeaveData, WorkspaceAccessLeaveErrors, WorkspaceAccessLeaveResponses, WorkspaceAccessListData, WorkspaceAccessListErrors, WorkspaceAccessListResponses, WorkspaceAccessRemoveMemberData, WorkspaceAccessRemoveMemberErrors, WorkspaceAccessRemoveMemberResponses, WorkspaceAccessResendInviteData, WorkspaceAccessResendInviteErrors, WorkspaceAccessResendInviteResponses, WorkspaceAccessRevokeInviteData, WorkspaceAccessRevokeInviteErrors, WorkspaceAccessRevokeInviteResponses, WorkspaceAccessSetRoleData, WorkspaceAccessSetRoleErrors, WorkspaceAccessSetRoleResponses, WorkspaceAccessTransferOwnerData, WorkspaceAccessTransferOwnerErrors, WorkspaceAccessTransferOwnerResponses, WorkspaceModelsAddKeyData, WorkspaceModelsAddKeyErrors, WorkspaceModelsAddKeyResponses, WorkspaceModelsClearDefaultData, WorkspaceModelsClearDefaultErrors, WorkspaceModelsClearDefaultResponses, WorkspaceModelsGetDefaultData, WorkspaceModelsGetDefaultErrors, WorkspaceModelsGetDefaultResponses, WorkspaceModelsListKeysData, WorkspaceModelsListKeysErrors, WorkspaceModelsListKeysResponses, WorkspaceModelsRemoveKeyData, WorkspaceModelsRemoveKeyErrors, WorkspaceModelsRemoveKeyResponses, WorkspaceModelsSetDefaultData, WorkspaceModelsSetDefaultErrors, WorkspaceModelsSetDefaultResponses, WorkspacesGetData, WorkspacesGetErrors, WorkspacesGetResponses } from './types.gen';
+import type { BillingCheckoutData, BillingCheckoutErrors, BillingCheckoutResponses, BillingPortalData, BillingPortalErrors, BillingPortalResponses, BillingStatusData, BillingStatusErrors, BillingStatusResponses, IntegrationsConnectData, IntegrationsConnectErrors, IntegrationsConnectResponses, MeGetAccountData, MeGetAccountErrors, MeGetAccountResponses, MeGetData, MeGetEmailPreferencesData, MeGetEmailPreferencesErrors, MeGetEmailPreferencesResponses, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, MeUpdateEmailPreferencesData, MeUpdateEmailPreferencesErrors, MeUpdateEmailPreferencesResponses, ReposClearOverrideData, ReposClearOverrideErrors, ReposClearOverrideResponses, ReposDeleteSecretData, ReposDeleteSecretErrors, ReposDeleteSecretResponses, ReposGetCapabilityRequestsData, ReposGetCapabilityRequestsErrors, ReposGetCapabilityRequestsResponses, ReposGetConfigData, ReposGetConfigErrors, ReposGetConfigResponses, ReposGetEnvironmentData, ReposGetEnvironmentErrors, ReposGetEnvironmentResponses, RepositoriesGetReviewExternalPrsData, RepositoriesGetReviewExternalPrsErrors, RepositoriesGetReviewExternalPrsResponses, RepositoriesSetReviewExternalPrsData, RepositoriesSetReviewExternalPrsErrors, RepositoriesSetReviewExternalPrsResponses, ReposListSecretsData, ReposListSecretsErrors, ReposListSecretsResponses, ReposPatchSecretData, ReposPatchSecretErrors, ReposPatchSecretResponses, ReposPreflightData, ReposPreflightErrors, ReposPreflightResponses, ReposPutSecretData, ReposPutSecretErrors, ReposPutSecretResponses, ReposSetOverrideData, ReposSetOverrideErrors, ReposSetOverrideResponses, SubscriptionsCompleteData, SubscriptionsCompleteErrors, SubscriptionsCompleteResponses, SubscriptionsListData, SubscriptionsListErrors, SubscriptionsListResponses, SubscriptionsPollData, SubscriptionsPollErrors, SubscriptionsPollResponses, SubscriptionsRemoveData, SubscriptionsRemoveErrors, SubscriptionsRemoveResponses, SubscriptionsStartData, SubscriptionsStartErrors, SubscriptionsStartResponses, SubscriptionsUpdateData, SubscriptionsUpdateErrors, SubscriptionsUpdateResponses, SubscriptionsUsageData, SubscriptionsUsageErrors, SubscriptionsUsageResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses, WorkspaceAccessApproveRequestData, WorkspaceAccessApproveRequestErrors, WorkspaceAccessApproveRequestResponses, WorkspaceAccessCreateInviteData, WorkspaceAccessCreateInviteErrors, WorkspaceAccessCreateInviteResponses, WorkspaceAccessDenyRequestData, WorkspaceAccessDenyRequestErrors, WorkspaceAccessDenyRequestResponses, WorkspaceAccessLeaveData, WorkspaceAccessLeaveErrors, WorkspaceAccessLeaveResponses, WorkspaceAccessListData, WorkspaceAccessListErrors, WorkspaceAccessListResponses, WorkspaceAccessRemoveMemberData, WorkspaceAccessRemoveMemberErrors, WorkspaceAccessRemoveMemberResponses, WorkspaceAccessResendInviteData, WorkspaceAccessResendInviteErrors, WorkspaceAccessResendInviteResponses, WorkspaceAccessRevokeInviteData, WorkspaceAccessRevokeInviteErrors, WorkspaceAccessRevokeInviteResponses, WorkspaceAccessSetRoleData, WorkspaceAccessSetRoleErrors, WorkspaceAccessSetRoleResponses, WorkspaceAccessTransferOwnerData, WorkspaceAccessTransferOwnerErrors, WorkspaceAccessTransferOwnerResponses, WorkspaceModelsAddKeyData, WorkspaceModelsAddKeyErrors, WorkspaceModelsAddKeyResponses, WorkspaceModelsClearDefaultData, WorkspaceModelsClearDefaultErrors, WorkspaceModelsClearDefaultResponses, WorkspaceModelsGetDefaultData, WorkspaceModelsGetDefaultErrors, WorkspaceModelsGetDefaultResponses, WorkspaceModelsListKeysData, WorkspaceModelsListKeysErrors, WorkspaceModelsListKeysResponses, WorkspaceModelsRemoveKeyData, WorkspaceModelsRemoveKeyErrors, WorkspaceModelsRemoveKeyResponses, WorkspaceModelsSetDefaultData, WorkspaceModelsSetDefaultErrors, WorkspaceModelsSetDefaultResponses, WorkspacesCreateData, WorkspacesCreateErrors, WorkspacesCreateResponses, WorkspacesGetData, WorkspacesGetErrors, WorkspacesGetResponses, WorkspacesGetReviewExternalPrsData, WorkspacesGetReviewExternalPrsErrors, WorkspacesGetReviewExternalPrsResponses, WorkspacesSetReviewExternalPrsData, WorkspacesSetReviewExternalPrsErrors, WorkspacesSetReviewExternalPrsResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -147,7 +147,7 @@ export const reposGetCapabilityRequests = <ThrowOnError extends boolean = false>
 /**
  * Get an integration browser handoff
  *
- * Returns only a Sinatra dashboard URL. Open it in a browser and sign in to complete authorization through the existing dashboard flow. GitHub, Linear and Slack require a current workspace owner or admin; Telegram links your personal account and is available to members when its rollout allows it. This request never starts OAuth, creates state or returns credentials. Poll `GET /v1/workspaces/{workspaceId}` afterward: `github.status`, `linear.status` and `slack.status` describe workspace connections; `telegram.connected` describes your personal account link, independently of `telegram.enabled`.
+ * Returns only a Sinatra dashboard URL. Open it in a browser and sign in to complete authorization through the existing dashboard flow. GitHub, Linear and Slack require a current workspace owner or admin; Telegram links your personal account and is available to members when Telegram Login is configured. This request never starts OAuth, creates state or returns credentials. Poll `GET /v1/workspaces/{workspaceId}` afterward: `github.status`, `linear.status` and `slack.status` describe workspace connections; `telegram.connected` describes your personal account link, independently of `telegram.enabled`.
  */
 export const integrationsConnect = <ThrowOnError extends boolean = false>(options: Options<IntegrationsConnectData, ThrowOnError>): RequestResult<IntegrationsConnectResponses, IntegrationsConnectErrors, ThrowOnError> => (options.client ?? client).get<IntegrationsConnectResponses, IntegrationsConnectErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],
@@ -227,6 +227,58 @@ export const workspaceModelsRemoveKey = <ThrowOnError extends boolean = false>(o
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/workspaces/{workspaceId}/model-credentials/{provider}',
     ...options
+});
+
+/**
+ * Read the external pull request review default
+ *
+ * Any current workspace member can read the workspace default. Returns 404 unless the external PR review rollout is enabled for this workspace or user. This setting does not start reviews.
+ */
+export const workspacesGetReviewExternalPrs = <ThrowOnError extends boolean = false>(options: Options<WorkspacesGetReviewExternalPrsData, ThrowOnError>): RequestResult<WorkspacesGetReviewExternalPrsResponses, WorkspacesGetReviewExternalPrsErrors, ThrowOnError> => (options.client ?? client).get<WorkspacesGetReviewExternalPrsResponses, WorkspacesGetReviewExternalPrsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/review-external-prs',
+    ...options
+});
+
+/**
+ * Set the external pull request review default
+ *
+ * Owner or admin only. Send only reviewExternalPrs as a boolean. Repositories set to inherit use this default; on and off override it. Returns 404 when the rollout is disabled, before write authorization. This setting does not start reviews.
+ */
+export const workspacesSetReviewExternalPrs = <ThrowOnError extends boolean = false>(options: Options<WorkspacesSetReviewExternalPrsData, ThrowOnError>): RequestResult<WorkspacesSetReviewExternalPrsResponses, WorkspacesSetReviewExternalPrsErrors, ThrowOnError> => (options.client ?? client).put<WorkspacesSetReviewExternalPrsResponses, WorkspacesSetReviewExternalPrsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/review-external-prs',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Read a repository's external pull request review setting
+ *
+ * Any current workspace member can read the repository override and effective enabled value. inherit uses the workspace default; on and off take precedence. Returns 404 when the rollout is disabled or the repository is outside this workspace.
+ */
+export const repositoriesGetReviewExternalPrs = <ThrowOnError extends boolean = false>(options: Options<RepositoriesGetReviewExternalPrsData, ThrowOnError>): RequestResult<RepositoriesGetReviewExternalPrsResponses, RepositoriesGetReviewExternalPrsErrors, ThrowOnError> => (options.client ?? client).get<RepositoriesGetReviewExternalPrsResponses, RepositoriesGetReviewExternalPrsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/review-external-prs',
+    ...options
+});
+
+/**
+ * Set a repository's external pull request review override
+ *
+ * Owner or admin only. Send only reviewExternalPrs as inherit, on or off. The response includes the saved override and effective enabled value. Returns 404 when the rollout is disabled, before write authorization, or the repository is outside this workspace. This setting does not start reviews or change .sinatrarc.
+ */
+export const repositoriesSetReviewExternalPrs = <ThrowOnError extends boolean = false>(options: Options<RepositoriesSetReviewExternalPrsData, ThrowOnError>): RequestResult<RepositoriesSetReviewExternalPrsResponses, RepositoriesSetReviewExternalPrsErrors, ThrowOnError> => (options.client ?? client).put<RepositoriesSetReviewExternalPrsResponses, RepositoriesSetReviewExternalPrsErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/review-external-prs',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -401,6 +453,21 @@ export const meGet = <ThrowOnError extends boolean = false>(options?: Options<Me
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/v1/me',
     ...options
+});
+
+/**
+ * Create a workspace
+ *
+ * Creates a workspace and makes you its owner, so an agent or script can set up a person's first workspace without the dashboard. It starts with no integrations: `GET /v1/workspaces/{workspaceId}/integrations/github/connect` returns the dashboard page where the person installs the Sinatra GitHub App and picks repositories. Each person can make one workspace this way; installing the Sinatra GitHub App on another account or organization makes more.
+ */
+export const workspacesCreate = <ThrowOnError extends boolean = false>(options: Options<WorkspacesCreateData, ThrowOnError>): RequestResult<WorkspacesCreateResponses, WorkspacesCreateErrors, ThrowOnError> => (options.client ?? client).post<WorkspacesCreateResponses, WorkspacesCreateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
