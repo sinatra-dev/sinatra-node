@@ -232,7 +232,7 @@ export type EmailPreferences = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `buzz_unavailable`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
      */
     error: string;
     /**
@@ -550,6 +550,34 @@ export type RepoSecrets = {
     secrets: Array<RepoSecret>;
 };
 
+export type RepoStatuses = {
+    repos: Array<{
+        repoId: string;
+        environment: {
+            initialPassState: string;
+            activeVersionId: string | null;
+            versions: Array<{
+                id: string;
+                sequence: number;
+                status: string;
+            }>;
+        } | null;
+        requests: Array<{
+            id: string;
+            capability: string;
+            target: string;
+            reason: string;
+            envVarName: string | null;
+            state: 'open' | 'repair_needed';
+            lastReportedAt: string | null;
+            expiredAt: string | null;
+            createdAt: string;
+            updatedAt: string;
+        }>;
+        openRequestCount: number;
+    }>;
+};
+
 /**
  * The stop was accepted.
  */
@@ -573,7 +601,7 @@ export type Task = {
      */
     status: string;
     /**
-     * Where the task started: `api` for the CLI, MCP, this API or the dashboard, `linear` or `github_issue` for an issue, `slack`, `telegram` or `buzz` for a chat (Buzz is not available yet). Other sources can appear, so treat an unknown value as a task started elsewhere.
+     * Where the task started: `api` for the CLI, MCP, this API or the dashboard, `linear` or `github_issue` for an issue, `slack` or `telegram` for a chat. Other sources can appear, so treat an unknown value as a task started elsewhere.
      */
     source: string;
     /**
@@ -1813,6 +1841,62 @@ export type ReposPutSecretResponses = {
 
 export type ReposPutSecretResponse = ReposPutSecretResponses[keyof ReposPutSecretResponses];
 
+export type ReposGetStatusesData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/repo-statuses';
+};
+
+export type ReposGetStatusesErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `repo_environments_not_enabled`: Repository environments are not enabled for this workspace.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type ReposGetStatusesError = ReposGetStatusesErrors[keyof ReposGetStatusesErrors];
+
+export type ReposGetStatusesResponses = {
+    /**
+     * Environment status and actionable requests grouped by repository.
+     */
+    200: RepoStatuses;
+};
+
+export type ReposGetStatusesResponse = ReposGetStatusesResponses[keyof ReposGetStatusesResponses];
+
 export type ReposGetEnvironmentData = {
     body?: never;
     path: {
@@ -1943,9 +2027,9 @@ export type IntegrationsConnectData = {
          */
         workspaceId: string;
         /**
-         * The integration to connect: github, linear, slack, telegram or buzz. Buzz is not available yet.
+         * The integration to connect: github, linear, slack or telegram.
          */
-        integration: 'github' | 'linear' | 'slack' | 'telegram' | 'buzz';
+        integration: 'github' | 'linear' | 'slack' | 'telegram';
     };
     query?: never;
     url: '/v1/workspaces/{workspaceId}/integrations/{integration}/connect';
@@ -1955,7 +2039,7 @@ export type IntegrationsConnectErrors = {
     /**
      * Bad request. The `error` code says which:
      *
-     * - `unsupported_integration`: Choose github, linear, slack, telegram or buzz.
+     * - `unsupported_integration`: Choose github, linear, slack or telegram.
      */
     400: Error;
     /**
@@ -1973,7 +2057,6 @@ export type IntegrationsConnectErrors = {
     /**
      * Not found. The `error` code says which:
      *
-     * - `buzz_unavailable`: Buzz is not available yet; no connection flow is enabled.
      * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
      * - `slack_disabled`: Slack connections are disabled on this deployment.
      * - `telegram_unavailable`: Telegram Login is not configured.
