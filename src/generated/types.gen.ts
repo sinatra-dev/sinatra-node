@@ -126,7 +126,7 @@ export type CreateTaskRequest = {
      */
     repo?: string | null;
     /**
-     * A model from Sinatra's catalog, such as `anthropic/claude-opus-5-5` or `openai-codex/gpt-6.1-sol`, that every agent on the task runs on. The model picks its engine. Omit it to use the repository's or workspace's model.
+     * A model from Sinatra's catalog, such as `anthropic/claude-opus-5-5` or `openai-codex/gpt-6.1-sol`, that every agent on the task runs on. The model picks its engine. Omit it to use your default or the workspace default.
      */
     model?: string | null;
 };

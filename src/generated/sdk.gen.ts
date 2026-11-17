@@ -558,7 +558,7 @@ export const tasksList = <ThrowOnError extends boolean = false>(options: Options
  *
  * Starts a task and returns `202` with the task and the id of your first message. The task runs like any other: it gets a sandbox, can open a pull request, and shows up in the dashboard.
  *
- * Only `prompt` is required. `title` defaults to the prompt's first line, up to 80 characters. `repo` is optional: omit it to let the agent choose a repository. `model` is optional: omit it to use the repository's or workspace's model. See [Models](https://docs.sinatra.dev/docs/configuration/models).
+ * Only `prompt` is required. `title` defaults to the prompt's first line, up to 80 characters. `repo` is optional: omit it to let the agent choose a repository. `model` is optional: omit it to use your default or the workspace default. See [Models](https://docs.sinatra.dev/docs/configuration/models).
  *
  * Before it makes the task, Sinatra checks that the workspace is connected to GitHub when the start names a repository (without GitHub a task that names none can still answer, research or plan), that billing allows the task, and that the queue has room. A refusal says which in its `error` code, and a retry with the same key of a start that already made its task is never refused.
  *
