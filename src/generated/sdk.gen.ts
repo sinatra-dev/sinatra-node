@@ -243,7 +243,7 @@ export const workspaceModelsRemoveKey = <ThrowOnError extends boolean = false>(o
 /**
  * Read the external pull request review default
  *
- * Any current workspace member can read the workspace default. Returns 404 unless the external PR review rollout is enabled for this workspace or user. This setting does not start reviews.
+ * Any current workspace member can read the workspace default and pending GitHub installation permission update. Returns 404 unless the external PR review rollout is enabled for this workspace or user. This setting does not start reviews.
  */
 export const workspacesGetReviewExternalPrs = <ThrowOnError extends boolean = false>(options: Options<WorkspacesGetReviewExternalPrsData, ThrowOnError>): RequestResult<WorkspacesGetReviewExternalPrsResponses, WorkspacesGetReviewExternalPrsErrors, ThrowOnError> => (options.client ?? client).get<WorkspacesGetReviewExternalPrsResponses, WorkspacesGetReviewExternalPrsErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }],

@@ -819,6 +819,21 @@ export type WorkspaceExternalPrReviews = {
      * The workspace default for external pull request reviews. Defaults to false.
      */
     reviewExternalPrs: boolean;
+    /**
+     * When the current GitHub installation permission-update episode was detected. Null when no permission update is pending.
+     */
+    permissionsOutdatedAt: string | null;
+    /**
+     * The exact GitHub installation settings page for approving updated permissions. Null when no permission update is pending.
+     */
+    githubInstallationSettingsUrl: string | null;
+};
+
+export type WorkspaceExternalPrReviewsRequest = {
+    /**
+     * The workspace default for external pull request reviews. Defaults to false.
+     */
+    reviewExternalPrs: boolean;
 };
 
 export type WorkspaceGrantRoleRequest = {
@@ -2552,7 +2567,7 @@ export type WorkspacesGetReviewExternalPrsError = WorkspacesGetReviewExternalPrs
 
 export type WorkspacesGetReviewExternalPrsResponses = {
     /**
-     * The workspace default, initially false.
+     * The workspace default, initially false, and pending permission update, if any.
      */
     200: WorkspaceExternalPrReviews;
 };
@@ -2560,7 +2575,7 @@ export type WorkspacesGetReviewExternalPrsResponses = {
 export type WorkspacesGetReviewExternalPrsResponse = WorkspacesGetReviewExternalPrsResponses[keyof WorkspacesGetReviewExternalPrsResponses];
 
 export type WorkspacesSetReviewExternalPrsData = {
-    body: WorkspaceExternalPrReviews;
+    body: WorkspaceExternalPrReviewsRequest;
     path: {
         /**
          * The workspace's id, from `GET /v1/me`.
@@ -2627,7 +2642,7 @@ export type WorkspacesSetReviewExternalPrsError = WorkspacesSetReviewExternalPrs
 
 export type WorkspacesSetReviewExternalPrsResponses = {
     /**
-     * The saved workspace default.
+     * The saved workspace default and pending permission update, if any.
      */
     200: WorkspaceExternalPrReviews;
 };
