@@ -373,6 +373,10 @@ export type PullRequest = {
     merged: boolean;
 };
 
+export type RepoCapabilityRequestDismissed = {
+    dismissed: true;
+};
+
 export type RepoCapabilityRequests = {
     requests: Array<{
         id: string;
@@ -384,11 +388,18 @@ export type RepoCapabilityRequests = {
         envVarName: string | null;
         state: string;
         evidence: unknown;
+        /**
+         * False when a host-bound HTTP header or token cannot satisfy the request; null is uncertain or historical.
+         */
+        secretSatisfiable: boolean | null;
         suppliedSecretId: string | null;
-        repairGeneration: number;
-        notifiedGeneration: number;
-        notifiedRecipientIds: Array<string>;
-        notificationBatchKeys: Array<string>;
+        remediation?: {
+            summary: string;
+            supplyCommand?: string;
+            dismissCommand: string;
+            url?: string;
+            note: string;
+        };
         lastReportedAt: string | null;
         expiredAt: string | null;
         createdAt: string;
@@ -569,6 +580,7 @@ export type RepoStatuses = {
             reason: string;
             envVarName: string | null;
             state: 'open' | 'repair_needed';
+            secretSatisfiable: boolean | null;
             lastReportedAt: string | null;
             expiredAt: string | null;
             createdAt: string;
@@ -2033,6 +2045,90 @@ export type ReposGetCapabilityRequestsResponses = {
 };
 
 export type ReposGetCapabilityRequestsResponse = ReposGetCapabilityRequestsResponses[keyof ReposGetCapabilityRequestsResponses];
+
+export type ReposDismissCapabilityRequestData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The repository id from the repos data in GET /v1/workspaces/{workspaceId}.
+         */
+        repoId: string;
+        /**
+         * The access request's id, from the workspace access snapshot.
+         */
+        requestId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/repos/{repoId}/capability-requests/{requestId}/dismiss';
+};
+
+export type ReposDismissCapabilityRequestErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Your workspace role can't do this.
+     * - `repo_environments_not_enabled`: Repository environments are not enabled for this workspace.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `capability_request_not_found`: The capability request does not exist in this repository.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type ReposDismissCapabilityRequestError = ReposDismissCapabilityRequestErrors[keyof ReposDismissCapabilityRequestErrors];
+
+export type ReposDismissCapabilityRequestResponses = {
+    /**
+     * The request was dismissed.
+     */
+    200: RepoCapabilityRequestDismissed;
+};
+
+export type ReposDismissCapabilityRequestResponse = ReposDismissCapabilityRequestResponses[keyof ReposDismissCapabilityRequestResponses];
 
 export type IntegrationsConnectData = {
     body?: never;
