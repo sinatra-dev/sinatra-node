@@ -90,6 +90,325 @@ export type BillingPortalRequest = {
 };
 
 /**
+ * A service whose hosted MCP server the workspace's agents can read through.
+ */
+export type ConnectorCatalogEntry = {
+    /**
+     * The connector's id, such as `neon` or `supabase`. Pass it as `connector` to connect. New connectors can appear.
+     */
+    id: string;
+    name: string;
+    /**
+     * What the agent can read through this connector.
+     */
+    summary: string;
+    /**
+     * How it can be connected. `token`: paste a provider token. `oauth`: sign in at the provider from the dashboard.
+     */
+    methods: Array<string>;
+    /**
+     * The provider reference a connection takes as `projectRef`. `null` when the connector takes none: leave `projectRef` out.
+     */
+    reference: {
+        /**
+         * What the provider calls the reference `projectRef` takes.
+         */
+        label: string;
+        /**
+         * Where to find it at the provider.
+         */
+        help: string;
+        /**
+         * When `false`, `projectRef` may be left out and the token decides what the connection reaches.
+         */
+        required: boolean;
+    } | null;
+    /**
+     * Deprecated: `reference.label`, or empty when there is none.
+     */
+    projectRefLabel: string;
+    /**
+     * Deprecated: `reference.help`, or empty when there is none.
+     */
+    projectRefHelp: string;
+    /**
+     * Where to create a token at the provider.
+     */
+    tokenHelp: string;
+    /**
+     * The provider page where a token is created.
+     */
+    tokenHelpUrl: string;
+    /**
+     * The provider's own advice on what to connect.
+     */
+    providerGuidance: string;
+    /**
+     * Only for a connector that can be signed in to: what happens at the provider when you sign in.
+     */
+    oauthHelp?: string;
+    /**
+     * Only for a connector that can be signed in to and whose provider keeps its MCP server listed as an authorized application after a disconnect: what stays there and where to remove it.
+     */
+    leftAtProvider?: string;
+    /**
+     * Deprecated: `acknowledgements.token`, or `acknowledgements.oauth` for a connector that has no pasted-token method.
+     */
+    acknowledgement: {
+        /**
+         * Send it as `acknowledgementVersion` to confirm you accepted this text.
+         */
+        version: string;
+        text: string;
+        /**
+         * Show it before the text. `null` when the provider enforces read-only access.
+         */
+        warning: {
+            /**
+             * `danger` when the token's or account's own permissions are the only limit, `caution` when Sinatra only asks for read-only access.
+             */
+            severity: 'caution' | 'danger';
+            title: string;
+            body: string;
+            /**
+             * What an agent could do if the access allows it.
+             */
+            items: Array<string>;
+        } | null;
+        /**
+         * Statements the person confirms one by one, each with its own checkbox, before connecting.
+         */
+        confirmations: Array<string>;
+    };
+    /**
+     * One acknowledgement per way to connect. Show the one for the method used, and connect only once every confirmation is accepted.
+     */
+    acknowledgements: {
+        /**
+         * What connecting a pasted token means. Present when `methods` includes `token`.
+         */
+        token?: {
+            /**
+             * Send it as `acknowledgementVersion` to confirm you accepted this text.
+             */
+            version: string;
+            text: string;
+            /**
+             * Show it before the text. `null` when the provider enforces read-only access.
+             */
+            warning: {
+                /**
+                 * `danger` when the token's or account's own permissions are the only limit, `caution` when Sinatra only asks for read-only access.
+                 */
+                severity: 'caution' | 'danger';
+                title: string;
+                body: string;
+                /**
+                 * What an agent could do if the access allows it.
+                 */
+                items: Array<string>;
+            } | null;
+            /**
+             * Statements the person confirms one by one, each with its own checkbox, before connecting.
+             */
+            confirmations: Array<string>;
+        };
+        /**
+         * What signing in at the provider means. Present when `methods` includes `oauth`.
+         */
+        oauth?: {
+            /**
+             * Send it as `acknowledgementVersion` to confirm you accepted this text.
+             */
+            version: string;
+            text: string;
+            /**
+             * Show it before the text. `null` when the provider enforces read-only access.
+             */
+            warning: {
+                /**
+                 * `danger` when the token's or account's own permissions are the only limit, `caution` when Sinatra only asks for read-only access.
+                 */
+                severity: 'caution' | 'danger';
+                title: string;
+                body: string;
+                /**
+                 * What an agent could do if the access allows it.
+                 */
+                items: Array<string>;
+            } | null;
+            /**
+             * Statements the person confirms one by one, each with its own checkbox, before connecting.
+             */
+            confirmations: Array<string>;
+        };
+    };
+    /**
+     * The dashboard page that opens this connector's connect dialog. Add `project`, `name` and `method` (`oauth` or `token`) to its query to fill the dialog in; signing in at the provider and accepting the warning happen there, in a workspace owner's or admin's browser.
+     */
+    connectUrl: string;
+};
+
+export type ConnectorConnectRequest = {
+    /**
+     * A catalog entry's `id`.
+     */
+    connector: string;
+    /**
+     * The provider's project reference, in the provider's format. Required when the catalog entry's `reference.required` is `true`, and refused when its `reference` is `null`.
+     */
+    projectRef?: string;
+    /**
+     * Your name for the connection, 1 to 64 characters with no line breaks, control or invisible format characters. Defaults to `projectRef`, or to `default` without one. The `serverName` it gives must not already be in use in the workspace.
+     */
+    label?: string;
+    /**
+     * The provider token, up to 4096 bytes. It is encrypted at rest and never returned.
+     */
+    token: string;
+    /**
+     * The catalog entry's `acknowledgements.token.version`, confirming you accepted its text.
+     */
+    acknowledgementVersion: string;
+    /**
+     * Required: the catalog entry's `acknowledgements.token.confirmations`, exactly and in order, each accepted by the person connecting.
+     */
+    confirmations?: Array<string>;
+    /**
+     * The task an agent's connect link came from. Once connected, an API task in this workspace is continued; anything else is left alone.
+     */
+    taskId?: unknown;
+};
+
+/**
+ * The new connection. No token, ciphertext or part of a token is ever returned.
+ */
+export type ConnectorConnected = {
+    /**
+     * The connection's id. Use it as `connectionId` to disconnect.
+     */
+    id: string;
+    /**
+     * The catalog entry's id.
+     */
+    connector: string;
+    /**
+     * The connector's display name.
+     */
+    name: string;
+    /**
+     * The workspace's name for this connection.
+     */
+    label: string;
+    /**
+     * The MCP server name agents see, derived from the connector and label.
+     */
+    serverName: string;
+    /**
+     * How it was connected, such as `token`.
+     */
+    method: string;
+    /**
+     * The provider reference the connection is pinned to; empty when it has none.
+     */
+    projectRef: string;
+    /**
+     * How far the read-only promise goes: `not_guaranteed` when Sinatra only asks the provider for read-only access, `enforced` when the provider enforces it, `token_decides` when the token's own permissions are the only limit.
+     */
+    grantLabel: string;
+    /**
+     * `active` once agents can use it. Other statuses can appear.
+     */
+    status: string;
+    connectedByUserId: string;
+    /**
+     * The connecting user's name, or their GitHub login as `@login`, the way the workspace's members list shows them. `null` when they have neither, or are no longer a member.
+     */
+    connectedByName: string | null;
+    createdAt: string;
+    /**
+     * Only when `taskId` was sent: `true` when that task was continued.
+     */
+    continued?: boolean;
+};
+
+/**
+ * A workspace connection. No token, ciphertext or part of a token is ever returned.
+ */
+export type ConnectorConnection = {
+    /**
+     * The connection's id. Use it as `connectionId` to disconnect.
+     */
+    id: string;
+    /**
+     * The catalog entry's id.
+     */
+    connector: string;
+    /**
+     * The connector's display name.
+     */
+    name: string;
+    /**
+     * The workspace's name for this connection.
+     */
+    label: string;
+    /**
+     * The MCP server name agents see, derived from the connector and label.
+     */
+    serverName: string;
+    /**
+     * How it was connected, such as `token`.
+     */
+    method: string;
+    /**
+     * The provider reference the connection is pinned to; empty when it has none.
+     */
+    projectRef: string;
+    /**
+     * How far the read-only promise goes: `not_guaranteed` when Sinatra only asks the provider for read-only access, `enforced` when the provider enforces it, `token_decides` when the token's own permissions are the only limit.
+     */
+    grantLabel: string;
+    /**
+     * `active` once agents can use it. Other statuses can appear.
+     */
+    status: string;
+    connectedByUserId: string;
+    /**
+     * The connecting user's name, or their GitHub login as `@login`, the way the workspace's members list shows them. `null` when they have neither, or are no longer a member.
+     */
+    connectedByName: string | null;
+    createdAt: string;
+};
+
+export type ConnectorDisconnected = {
+    ok: true;
+    /**
+     * `true` when the token is still valid at the provider: revoke it there too. Always `true` for a pasted token.
+     */
+    revokeAtProvider: boolean;
+    /**
+     * Only for a signed-in connection that held tokens: `revoked` when Sinatra revoked its access at the provider, `failed` when it could not (remove the access in your account at the provider).
+     */
+    providerRevocation?: 'revoked' | 'failed';
+    /**
+     * Only for a signed-in connection to a provider that keeps its MCP server listed as an authorized application after a disconnect, whether or not `providerRevocation` is `revoked`: what stays there and where to remove it. Never for a pasted token.
+     */
+    leftAtProvider?: string;
+};
+
+export type Connectors = {
+    /**
+     * Whether connectors are turned on for the workspace. When `false`, `catalog` is empty and nothing new can be connected.
+     */
+    enabled: boolean;
+    catalog: Array<ConnectorCatalogEntry>;
+    /**
+     * The workspace's connections, oldest first. Disconnected ones are left out.
+     */
+    connections: Array<ConnectorConnection>;
+};
+
+/**
  * A message to send on a task.
  */
 export type CreateMessageRequest = {
@@ -232,7 +551,7 @@ export type EmailPreferences = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `acknowledgement_required`, `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `connection_not_found`, `connector_cap_exceeded`, `connector_label_taken`, `connector_not_found`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_label`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_project_ref`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invalid_token_value`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `method_not_supported`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
      */
     error: string;
     /**
@@ -398,7 +717,7 @@ export type RepoCapabilityRequests = {
             supplyCommand?: string;
             dismissCommand: string;
             url?: string;
-            note: string;
+            note?: string;
         };
         lastReportedAt: string | null;
         expiredAt: string | null;
@@ -1001,6 +1320,12 @@ export type WorkspaceOverview = {
          * Whether the current user has linked their personal Telegram account. This is independent of workspace enablement.
          */
         connected: boolean;
+    };
+    /**
+     * Present only where connectors are turned on for the workspace.
+     */
+    connectors?: {
+        available: boolean;
     };
     repos: Array<{
         id: string;
@@ -2129,6 +2454,229 @@ export type ReposDismissCapabilityRequestResponses = {
 };
 
 export type ReposDismissCapabilityRequestResponse = ReposDismissCapabilityRequestResponses[keyof ReposDismissCapabilityRequestResponses];
+
+export type ConnectorsListData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/connectors';
+};
+
+export type ConnectorsListErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist. Also answered when connectors aren't turned on for the workspace and it has no connections.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type ConnectorsListError = ConnectorsListErrors[keyof ConnectorsListErrors];
+
+export type ConnectorsListResponses = {
+    /**
+     * The catalog and the workspace's connections.
+     */
+    200: Connectors;
+};
+
+export type ConnectorsListResponse = ConnectorsListResponses[keyof ConnectorsListResponses];
+
+export type ConnectorsConnectData = {
+    body: ConnectorConnectRequest;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/connectors';
+};
+
+export type ConnectorsConnectErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `acknowledgement_required`: `acknowledgementVersion` isn't the current acknowledgement's version, or `confirmations` isn't exactly the catalog entry's `acknowledgements.token.confirmations` in order. Show its warning, text and confirmations, and send its `version` and every confirmation the person accepted.
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `connector_cap_exceeded`: The workspace has reached its limit of 20 connections. Disconnect one first.
+     * - `invalid_body`: Send `connector`, `token` and `acknowledgementVersion` as strings and `confirmations` as an array of strings, and optionally `projectRef`, `label` and `taskId`. No other fields are accepted.
+     * - `invalid_label`: `label`, or `projectRef` when no label is sent, isn't 1 to 64 characters once trimmed, or contains a line break, another control character, or an invisible format character such as a zero-width space or a bidirectional override.
+     * - `invalid_project_ref`: `projectRef` isn't in the provider's format.
+     * - `invalid_token_value`: `token` is empty once trimmed, over 4096 bytes, or contains whitespace or a control character.
+     * - `method_not_supported`: The connector can't be connected this way. Its catalog entry's `methods` lists the ways it can be; one that only signs in at the provider is connected from the dashboard.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner or admin can connect a service.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `connector_not_found`: No connector in the catalog has that id. `GET /v1/workspaces/{workspaceId}/connectors` lists them.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist. Also answered when connectors aren't turned on for the workspace.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `connector_label_taken`: Another of the workspace's connections already has the `serverName` this label gives. Choose another label.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `unavailable`: Token encryption is unavailable. Retry later.
+     */
+    503: Error;
+};
+
+export type ConnectorsConnectError = ConnectorsConnectErrors[keyof ConnectorsConnectErrors];
+
+export type ConnectorsConnectResponses = {
+    /**
+     * The new connection, with no token.
+     */
+    200: ConnectorConnected;
+};
+
+export type ConnectorsConnectResponse = ConnectorsConnectResponses[keyof ConnectorsConnectResponses];
+
+export type ConnectorsDisconnectData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The connection's id, from `GET /v1/workspaces/{workspaceId}/connectors`.
+         */
+        connectionId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/connectors/{connectionId}';
+};
+
+export type ConnectorsDisconnectErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only a current workspace owner or admin can disconnect a service.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `connection_not_found`: No connection with that id in this workspace, or it is already disconnected.
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type ConnectorsDisconnectError = ConnectorsDisconnectErrors[keyof ConnectorsDisconnectErrors];
+
+export type ConnectorsDisconnectResponses = {
+    /**
+     * Disconnected.
+     */
+    200: ConnectorDisconnected;
+};
+
+export type ConnectorsDisconnectResponse = ConnectorsDisconnectResponses[keyof ConnectorsDisconnectResponses];
 
 export type IntegrationsConnectData = {
     body?: never;
