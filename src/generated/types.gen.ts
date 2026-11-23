@@ -533,6 +533,16 @@ export type DelegateTicketResponse = {
 };
 
 /**
+ * The task was dismissed from Needs you.
+ */
+export type DismissTaskResponse = {
+    /**
+     * Always `true`: the task is now Idle.
+     */
+    dismissed: true;
+};
+
+/**
  * Your account-wide email preferences, shared with the signed email-preferences page.
  */
 export type EmailPreferences = {
@@ -551,7 +561,7 @@ export type EmailPreferences = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `acknowledgement_required`, `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `connection_not_found`, `connector_cap_exceeded`, `connector_label_taken`, `connector_not_found`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_label`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_project_ref`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invalid_token_value`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `method_not_supported`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `acknowledgement_required`, `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `connection_not_found`, `connector_cap_exceeded`, `connector_label_taken`, `connector_not_found`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_label`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_project_ref`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invalid_token_value`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `method_not_supported`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_needs_input`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
      */
     error: string;
     /**
@@ -5143,6 +5153,84 @@ export type TasksStopResponses = {
 };
 
 export type TasksStopResponse = TasksStopResponses[keyof TasksStopResponses];
+
+export type TasksDismissData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The task's id.
+         */
+        taskId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/tasks/{taskId}/dismiss';
+};
+
+export type TasksDismissErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: No such task in the workspace, or the workspace doesn't exist or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `not_needs_input`: The task isn't waiting for your input, or it has a turn waiting in the queue. Running, queued and idle tasks cannot be dismissed.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type TasksDismissError = TasksDismissErrors[keyof TasksDismissErrors];
+
+export type TasksDismissResponses = {
+    /**
+     * The task was dismissed.
+     */
+    200: DismissTaskResponse;
+};
+
+export type TasksDismissResponse = TasksDismissResponses[keyof TasksDismissResponses];
 
 export type MessagesListData = {
     body?: never;
