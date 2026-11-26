@@ -429,6 +429,36 @@ export type CreateMessageResponse = {
 };
 
 /**
+ * A recurring task to create. You own it, and each run starts a task as you.
+ */
+export type CreateRecurringTaskRequest = {
+    /**
+     * A short name, up to 200 characters. Defaults to the prompt's first line, cut to 200 characters.
+     */
+    name?: string;
+    /**
+     * What each run asks, as you'd ask a teammate. Each run starts a task whose first message is this prompt under two lines naming the recurring task and the run's time; that message must fit in 100,000 characters.
+     */
+    prompt: string;
+    /**
+     * When runs start. `times` holds 1 to 4 different 24-hour `HH:MM` times, local to `timezone`. Send exactly one of `weekdays`, days of the week from 0 (Sunday) to 6 (Saturday), or `dayOfMonth`, a day from 1 to 28. Every weekday at 9:00 is `{ "times": ["09:00"], "weekdays": [1, 2, 3, 4, 5] }`; the first of each month is `{ "times": ["09:00"], "dayOfMonth": 1 }`.
+     */
+    cadence: {
+        times: Array<string>;
+        weekdays?: Array<number>;
+        dayOfMonth?: number;
+    };
+    /**
+     * An IANA time zone, such as `America/Chicago`. The `cadence` times are local to it.
+     */
+    timezone: string;
+    /**
+     * Whether the owner gets an email when each run's agent finishes or needs a reply. Defaults to `true`.
+     */
+    notifyByEmail?: boolean;
+};
+
+/**
  * A task to start.
  */
 export type CreateTaskRequest = {
@@ -561,7 +591,7 @@ export type EmailPreferences = {
  */
 export type Error = {
     /**
-     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `acknowledgement_required`, `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `connection_not_found`, `connector_cap_exceeded`, `connector_label_taken`, `connector_not_found`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_label`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_project_ref`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invalid_token_value`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `method_not_supported`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_needs_input`, `not_running`, `payment_required`, `plan_required`, `plans_not_configured`, `provider_unreachable`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `state_mismatch`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `workspace_limit`.
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear. Known codes: `acknowledgement_required`, `actor_not_authorized`, `already_member`, `already_subscribed`, `assigned_to_other`, `bad_request`, `billing_disabled`, `capability_request_not_found`, `capability_target_not_authorized`, `capacity_full`, `code_exchange_failed`, `connection_not_found`, `connector_cap_exceeded`, `connector_label_taken`, `connector_not_found`, `consumed`, `customer_missing`, `declined`, `device_auth_not_enabled`, `expired`, `feature_off`, `forbidden`, `github_identity_required`, `github_not_connected`, `github_rate_limited`, `idempotency_conflict`, `illegal_role`, `internal_error`, `invalid_body`, `invalid_code`, `invalid_cursor`, `invalid_idempotency_key`, `invalid_label`, `invalid_limit`, `invalid_model`, `invalid_model_selection`, `invalid_name`, `invalid_override_fragment`, `invalid_pending_connect`, `invalid_project_ref`, `invalid_prompt`, `invalid_repo`, `invalid_secret_header`, `invalid_secret_hosts`, `invalid_secret_name`, `invalid_secret_prefix`, `invalid_secret_value`, `invalid_status`, `invalid_title`, `invalid_token`, `invalid_token_value`, `invite_delivery_failed`, `invite_limit`, `invite_not_found`, `invite_revoked`, `issue_closed`, `issue_not_found`, `key_validation_failed`, `linear_app_user_missing`, `linear_identity_conflict`, `linear_identity_unlinked`, `linear_not_connected`, `linear_reconnect_required`, `membership_not_found`, `method_not_supported`, `model_key_not_found`, `no_checkout_url`, `no_customer`, `no_portal_url`, `not_an_api_task`, `not_an_issue`, `not_connected`, `not_found`, `not_needs_input`, `not_running`, `owner_left`, `payment_required`, `plan_required`, `plans_not_configured`, `previous_run_active`, `provider_unreachable`, `recurring_task_limit`, `repo_disabled`, `repo_environments_not_enabled`, `repo_not_found`, `request_not_found`, `request_not_pending`, `revoked`, `secret_cap_exceeded`, `slack_disabled`, `start_failed`, `state_mismatch`, `task_missing`, `telegram_unavailable`, `unavailable`, `unsupported_integration`, `unsupported_provider`, `usage_unavailable`, `waiting_for_reply`, `workspace_limit`.
      */
     error: string;
     /**
@@ -700,6 +730,363 @@ export type PullRequest = {
      * `true` once the pull request is merged.
      */
     merged: boolean;
+};
+
+/**
+ * A recurring task: a prompt that starts a task on a schedule, as the member who created it, until someone pauses or deletes it.
+ */
+export type RecurringTask = {
+    /**
+     * The recurring task's id. Use it as `taskId` in the recurring task endpoints.
+     */
+    id: string;
+    /**
+     * The workspace's id.
+     */
+    workspaceId: string;
+    /**
+     * The user id of the member who created it. Only they can edit, resume or run it, and every run starts a task as them.
+     */
+    ownerUserId: string;
+    /**
+     * Its name, which each run's task title shows.
+     */
+    name: string;
+    /**
+     * What each run asks.
+     */
+    prompt: string;
+    /**
+     * When runs start. `times` holds 1 to 4 different 24-hour `HH:MM` times, local to `timezone`. Send exactly one of `weekdays`, days of the week from 0 (Sunday) to 6 (Saturday), or `dayOfMonth`, a day from 1 to 28. Every weekday at 9:00 is `{ "times": ["09:00"], "weekdays": [1, 2, 3, 4, 5] }`; the first of each month is `{ "times": ["09:00"], "dayOfMonth": 1 }`.
+     */
+    cadence: {
+        times: Array<string>;
+        weekdays?: Array<number>;
+        dayOfMonth?: number;
+    };
+    /**
+     * The IANA time zone the `cadence` times are local to.
+     */
+    timezone: string;
+    /**
+     * Whether the owner gets an email when each run's agent finishes or needs a reply. Defaults to `true`.
+     */
+    notifyByEmail: boolean;
+    /**
+     * When the next scheduled run starts. `null` while paused.
+     */
+    nextRunAt: string | null;
+    /**
+     * When it was paused. `null` while scheduled runs are on.
+     */
+    pausedAt: string | null;
+    /**
+     * `user` when a person paused it. Otherwise Sinatra paused it because a scheduled run was refused, such as when the owner left the workspace or billing stopped the start, and this says why. `null` while scheduled runs are on.
+     */
+    pausedReason: string | null;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type RecurringTaskDetail = {
+    task: RecurringTask;
+    /**
+     * Up to 50 runs, newest first.
+     */
+    runs: Array<{
+        /**
+         * The run's id.
+         */
+        id: string;
+        /**
+         * The workspace's id.
+         */
+        workspaceId: string;
+        /**
+         * The recurring task's id.
+         */
+        recurringTaskId: string;
+        /**
+         * The scheduled time this run is for. For a run started by hand, when it was asked for.
+         */
+        scheduledFor: string;
+        /**
+         * `schedule` for a scheduled run, `manual` for one started by hand. Other values can appear.
+         */
+        trigger: string;
+        /**
+         * The user id of the owner the run's task starts as.
+         */
+        ownerUserId: string;
+        /**
+         * The prompt when the run was made.
+         */
+        message: string;
+        /**
+         * The recurring task's name when the run was made. `null` on some older runs.
+         */
+        taskName: string | null;
+        /**
+         * `started` once its task started. `skipped` or `refused` when it didn't, with `reason` saying why. `pending` while a start is still being tried: a scheduled run that met a full queue or an outage is retried every minute until a minute before the next scheduled time, then `refused`. Other values can appear.
+         */
+        outcome: string;
+        /**
+         * Why the run didn't start, as a code, such as `previous_run_active` (an earlier run's task is still running or queued), `waiting_for_reply` (an earlier run's task waits for a reply), `paused`, `owner_left`, `capacity_full`, `start_failed`, or a refused start's error code such as `payment_required`. `null` when there's nothing to say. Other codes can appear.
+         */
+        reason: string | null;
+        /**
+         * A sentence saying why the run didn't start, to show a person. `null` when there's none.
+         */
+        reasonText: string | null;
+        /**
+         * The task the run made. Use it as `taskId` in the task endpoints. `null` when no task was made.
+         */
+        workstreamId: string | null;
+        /**
+         * When the owner was emailed that the run's agent finished or needed a reply. `null` until then, and when email is off.
+         */
+        notifiedAt: string | null;
+        createdAt: string;
+        /**
+         * When the run's task was created. `null` when no task was made.
+         */
+        startedAt: string | null;
+    }>;
+    /**
+     * Pass it as `before` to read older runs. `null` when there are no more.
+     */
+    next: string | null;
+};
+
+export type RecurringTaskList = {
+    /**
+     * The workspace's recurring tasks, newest first.
+     */
+    tasks: Array<{
+        /**
+         * The recurring task's id. Use it as `taskId` in the recurring task endpoints.
+         */
+        id: string;
+        /**
+         * The workspace's id.
+         */
+        workspaceId: string;
+        /**
+         * The user id of the member who created it. Only they can edit, resume or run it, and every run starts a task as them.
+         */
+        ownerUserId: string;
+        /**
+         * Its name, which each run's task title shows.
+         */
+        name: string;
+        /**
+         * What each run asks.
+         */
+        prompt: string;
+        /**
+         * When runs start. `times` holds 1 to 4 different 24-hour `HH:MM` times, local to `timezone`. Send exactly one of `weekdays`, days of the week from 0 (Sunday) to 6 (Saturday), or `dayOfMonth`, a day from 1 to 28. Every weekday at 9:00 is `{ "times": ["09:00"], "weekdays": [1, 2, 3, 4, 5] }`; the first of each month is `{ "times": ["09:00"], "dayOfMonth": 1 }`.
+         */
+        cadence: {
+            times: Array<string>;
+            weekdays?: Array<number>;
+            dayOfMonth?: number;
+        };
+        /**
+         * The IANA time zone the `cadence` times are local to.
+         */
+        timezone: string;
+        /**
+         * Whether the owner gets an email when each run's agent finishes or needs a reply. Defaults to `true`.
+         */
+        notifyByEmail: boolean;
+        /**
+         * When the next scheduled run starts. `null` while paused.
+         */
+        nextRunAt: string | null;
+        /**
+         * When it was paused. `null` while scheduled runs are on.
+         */
+        pausedAt: string | null;
+        /**
+         * `user` when a person paused it. Otherwise Sinatra paused it because a scheduled run was refused, such as when the owner left the workspace or billing stopped the start, and this says why. `null` while scheduled runs are on.
+         */
+        pausedReason: string | null;
+        createdAt: string;
+        updatedAt: string;
+        /**
+         * The owner's user id, name and GitHub login. `null` when they are no longer a member.
+         */
+        owner: {
+            id: string;
+            name: string | null;
+            githubLogin: string | null;
+        } | null;
+        /**
+         * The most recent run. `null` before the first.
+         */
+        lastRun: RecurringTaskRun | null;
+    }>;
+};
+
+/**
+ * Changes to a recurring task. Fields you leave out stay as they are.
+ */
+export type RecurringTaskRequest = {
+    /**
+     * A short name, up to 200 characters. Defaults to the prompt's first line, cut to 200 characters.
+     */
+    name?: string;
+    /**
+     * What each run asks, as you'd ask a teammate. Each run starts a task whose first message is this prompt under two lines naming the recurring task and the run's time; that message must fit in 100,000 characters.
+     */
+    prompt?: string;
+    /**
+     * When runs start. `times` holds 1 to 4 different 24-hour `HH:MM` times, local to `timezone`. Send exactly one of `weekdays`, days of the week from 0 (Sunday) to 6 (Saturday), or `dayOfMonth`, a day from 1 to 28. Every weekday at 9:00 is `{ "times": ["09:00"], "weekdays": [1, 2, 3, 4, 5] }`; the first of each month is `{ "times": ["09:00"], "dayOfMonth": 1 }`.
+     */
+    cadence?: {
+        times: Array<string>;
+        weekdays?: Array<number>;
+        dayOfMonth?: number;
+    };
+    /**
+     * An IANA time zone, such as `America/Chicago`. The `cadence` times are local to it.
+     */
+    timezone?: string;
+    /**
+     * Whether the owner gets an email when each run's agent finishes or needs a reply. Defaults to `true`.
+     */
+    notifyByEmail?: boolean;
+};
+
+export type RecurringTaskResponse = {
+    task: RecurringTask;
+};
+
+/**
+ * One run of a recurring task: a scheduled time, or a start by hand, and what came of it.
+ */
+export type RecurringTaskRun = {
+    /**
+     * The run's id.
+     */
+    id: string;
+    /**
+     * The workspace's id.
+     */
+    workspaceId: string;
+    /**
+     * The recurring task's id.
+     */
+    recurringTaskId: string;
+    /**
+     * The scheduled time this run is for. For a run started by hand, when it was asked for.
+     */
+    scheduledFor: string;
+    /**
+     * `schedule` for a scheduled run, `manual` for one started by hand. Other values can appear.
+     */
+    trigger: string;
+    /**
+     * The user id of the owner the run's task starts as.
+     */
+    ownerUserId: string;
+    /**
+     * The prompt when the run was made.
+     */
+    message: string;
+    /**
+     * The recurring task's name when the run was made. `null` on some older runs.
+     */
+    taskName: string | null;
+    /**
+     * `started` once its task started. `skipped` or `refused` when it didn't, with `reason` saying why. `pending` while a start is still being tried: a scheduled run that met a full queue or an outage is retried every minute until a minute before the next scheduled time, then `refused`. Other values can appear.
+     */
+    outcome: string;
+    /**
+     * Why the run didn't start, as a code, such as `previous_run_active` (an earlier run's task is still running or queued), `waiting_for_reply` (an earlier run's task waits for a reply), `paused`, `owner_left`, `capacity_full`, `start_failed`, or a refused start's error code such as `payment_required`. `null` when there's nothing to say. Other codes can appear.
+     */
+    reason: string | null;
+    /**
+     * A sentence saying why the run didn't start, to show a person. `null` when there's none.
+     */
+    reasonText: string | null;
+    /**
+     * The task the run made. Use it as `taskId` in the task endpoints. `null` when no task was made.
+     */
+    workstreamId: string | null;
+    /**
+     * When the owner was emailed that the run's agent finished or needed a reply. `null` until then, and when email is off.
+     */
+    notifiedAt: string | null;
+    createdAt: string;
+};
+
+/**
+ * An error from running a recurring task now.
+ */
+export type RecurringTaskRunError = {
+    /**
+     * A machine-readable code, such as `invalid_prompt`. Branch on this, not on `reason`. New codes can appear.
+     */
+    error: string;
+    /**
+     * A sentence saying what went wrong and, where it helps, what to do. Written to show to a person.
+     */
+    reason?: string;
+    /**
+     * The request's id. Present on some errors, not all; the `x-request-id` response header always carries it. Share it with support.
+     */
+    requestId?: string;
+    /**
+     * Why a start was refused, on `payment_required` and `github_not_connected`. For `payment_required`: `own_credentials_required` or `subscription_inactive`. For `github_not_connected`: `missing` or `suspended`.
+     */
+    refusal?: string;
+    /**
+     * The settings section that fixes the refusal: your model credentials or billing, on `payment_required`; billing, when starting a task, on `capacity_full`.
+     */
+    billingUrl?: string;
+    /**
+     * The settings page that fixes the refusal, on `github_not_connected`.
+     */
+    settingsUrl?: string;
+    /**
+     * The workspace's plan, on `capacity_full` when starting a task.
+     */
+    plan?: string;
+    /**
+     * How many agents the plan runs at a time, on `capacity_full` when starting a task.
+     */
+    running?: number;
+    /**
+     * How many agents the plan lets wait, on `capacity_full` when starting a task.
+     */
+    queued?: number;
+    /**
+     * On `unavailable` after a start: the task that was made. Retry with the same key, or send a message on it.
+     */
+    taskId?: string;
+    /**
+     * On `unavailable`: the message that was saved but not sent yet. Retry with it as the `Idempotency-Key`.
+     */
+    messageId?: string;
+    /**
+     * The run as recorded, with its `outcome` and `reason`, when one was made.
+     */
+    run?: RecurringTaskRun | null;
+};
+
+/**
+ * The run that started, and its task.
+ */
+export type RecurringTaskStarted = {
+    /**
+     * The run, with `outcome` `started`.
+     */
+    run: RecurringTaskRun | null;
+    /**
+     * The task the run started. Use it as `taskId` in the task endpoints.
+     */
+    taskId: string;
 };
 
 export type RepoCapabilityRequestDismissed = {
@@ -6040,3 +6427,653 @@ export type SubscriptionsCompleteResponses = {
 };
 
 export type SubscriptionsCompleteResponse = SubscriptionsCompleteResponses[keyof SubscriptionsCompleteResponses];
+
+export type RecurringTasksListData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks';
+};
+
+export type RecurringTasksListErrors = {
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist. Also answered when recurring tasks aren't turned on for the workspace.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type RecurringTasksListError = RecurringTasksListErrors[keyof RecurringTasksListErrors];
+
+export type RecurringTasksListResponses = {
+    /**
+     * The workspace's recurring tasks.
+     */
+    200: RecurringTaskList;
+};
+
+export type RecurringTasksListResponse = RecurringTasksListResponses[keyof RecurringTasksListResponses];
+
+export type RecurringTasksCreateData = {
+    body: CreateRecurringTaskRequest;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks';
+};
+
+export type RecurringTasksCreateErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `invalid_body`: The body has a field that isn't documented or has the wrong type, `cadence` or `timezone` is invalid, or `cadence` or `timezone` is missing.
+     * - `invalid_prompt`: `prompt` is empty after trimming, or the first message a run sends, the prompt under two lines naming the recurring task and the run's time, is over 100,000 characters. Also answered when `prompt` is missing.
+     * - `invalid_title`: `name` is `null`, not a string, empty, or over 200 characters after trimming.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: The workspace doesn't exist, or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist. Also answered when recurring tasks aren't turned on for the workspace.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `github_not_connected`: The workspace's GitHub App installation is suspended (`refusal` is `suspended`). `reason` says what to do and ends with `settingsUrl`, the installation's page on GitHub. A workspace not connected to GitHub at all isn't refused: runs name no repository.
+     * - `payment_required`: Billing would stop the task: you have no model access in this workspace (`refusal` is `own_credentials_required`), or its subscription is past due (`refusal` is `subscription_inactive`). `reason` says what to do and ends with `billingUrl`, the settings section that fixes it: your model credentials for `own_credentials_required`, billing for `subscription_inactive`.
+     * - `recurring_task_limit`: The owner already has 10 recurring tasks in this workspace that aren't paused. Pause or delete one first.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `unavailable`: Sinatra couldn't schedule the recurring task, so it wasn't created. Retry.
+     */
+    503: Error;
+};
+
+export type RecurringTasksCreateError = RecurringTasksCreateErrors[keyof RecurringTasksCreateErrors];
+
+export type RecurringTasksCreateResponses = {
+    /**
+     * The new recurring task, with its next run time.
+     */
+    201: RecurringTaskResponse;
+};
+
+export type RecurringTasksCreateResponse = RecurringTasksCreateResponses[keyof RecurringTasksCreateResponses];
+
+export type RecurringTasksDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The recurring task's id, from `GET /v1/workspaces/{workspaceId}/recurring-tasks`. Not the id of a task a run started.
+         */
+        taskId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}';
+};
+
+export type RecurringTasksDeleteErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only the recurring task's owner or a workspace owner or admin can delete it.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: No recurring task with that id in the workspace, recurring tasks aren't turned on for the workspace, or the workspace doesn't exist or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `unavailable`: The recurring task was deleted, and no run of it will start, but Sinatra couldn't remove its schedule right away. There's nothing to retry.
+     */
+    503: Error;
+};
+
+export type RecurringTasksDeleteError = RecurringTasksDeleteErrors[keyof RecurringTasksDeleteErrors];
+
+export type RecurringTasksDeleteResponses = {
+    /**
+     * Deleted. There is no response body.
+     */
+    204: void;
+};
+
+export type RecurringTasksDeleteResponse = RecurringTasksDeleteResponses[keyof RecurringTasksDeleteResponses];
+
+export type RecurringTasksGetData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The recurring task's id, from `GET /v1/workspaces/{workspaceId}/recurring-tasks`. Not the id of a task a run started.
+         */
+        taskId: string;
+    };
+    query?: {
+        /**
+         * The `next` value from the previous page, to read older runs.
+         */
+        before?: string;
+    };
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}';
+};
+
+export type RecurringTasksGetErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `invalid_cursor`: `before` isn't one of this recurring task's runs. Pass `next` from the previous page.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: No recurring task with that id in the workspace, recurring tasks aren't turned on for the workspace, or the workspace doesn't exist or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+};
+
+export type RecurringTasksGetError = RecurringTasksGetErrors[keyof RecurringTasksGetErrors];
+
+export type RecurringTasksGetResponses = {
+    /**
+     * The recurring task and a page of its runs.
+     */
+    200: RecurringTaskDetail;
+};
+
+export type RecurringTasksGetResponse = RecurringTasksGetResponses[keyof RecurringTasksGetResponses];
+
+export type RecurringTasksUpdateData = {
+    body: RecurringTaskRequest;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The recurring task's id, from `GET /v1/workspaces/{workspaceId}/recurring-tasks`. Not the id of a task a run started.
+         */
+        taskId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}';
+};
+
+export type RecurringTasksUpdateErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     * - `invalid_body`: The body has a field that isn't documented or has the wrong type, or `cadence` or `timezone` is invalid.
+     * - `invalid_prompt`: `prompt` is empty after trimming, or the first message a run sends, the prompt under two lines naming the recurring task and the run's time, is over 100,000 characters.
+     * - `invalid_title`: `name` is `null`, not a string, empty, or over 200 characters after trimming.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only the recurring task's owner can edit it.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: No recurring task with that id in the workspace, recurring tasks aren't turned on for the workspace, or the workspace doesn't exist or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `github_not_connected`: The workspace's GitHub App installation is suspended (`refusal` is `suspended`). `reason` says what to do and ends with `settingsUrl`, the installation's page on GitHub. A workspace not connected to GitHub at all isn't refused: runs name no repository.
+     * - `payment_required`: Billing would stop the task: you have no model access in this workspace (`refusal` is `own_credentials_required`), or its subscription is past due (`refusal` is `subscription_inactive`). `reason` says what to do and ends with `billingUrl`, the settings section that fixes it: your model credentials for `own_credentials_required`, billing for `subscription_inactive`.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `unavailable`: Sinatra couldn't update the recurring task's schedule. The change may already be saved; retry it.
+     */
+    503: Error;
+};
+
+export type RecurringTasksUpdateError = RecurringTasksUpdateErrors[keyof RecurringTasksUpdateErrors];
+
+export type RecurringTasksUpdateResponses = {
+    /**
+     * The edited recurring task.
+     */
+    200: RecurringTaskResponse;
+};
+
+export type RecurringTasksUpdateResponse = RecurringTasksUpdateResponses[keyof RecurringTasksUpdateResponses];
+
+export type RecurringTasksPauseData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The recurring task's id, from `GET /v1/workspaces/{workspaceId}/recurring-tasks`. Not the id of a task a run started.
+         */
+        taskId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}/pause';
+};
+
+export type RecurringTasksPauseErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only the recurring task's owner or a workspace owner or admin can pause it.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: No recurring task with that id in the workspace, recurring tasks aren't turned on for the workspace, or the workspace doesn't exist or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `unavailable`: The recurring task was paused, and no scheduled run starts while it is, but Sinatra couldn't update its schedule. Retry.
+     */
+    503: Error;
+};
+
+export type RecurringTasksPauseError = RecurringTasksPauseErrors[keyof RecurringTasksPauseErrors];
+
+export type RecurringTasksPauseResponses = {
+    /**
+     * Paused. There is no response body.
+     */
+    204: void;
+};
+
+export type RecurringTasksPauseResponse = RecurringTasksPauseResponses[keyof RecurringTasksPauseResponses];
+
+export type RecurringTasksResumeData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The recurring task's id, from `GET /v1/workspaces/{workspaceId}/recurring-tasks`. Not the id of a task a run started.
+         */
+        taskId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}/resume';
+};
+
+export type RecurringTasksResumeErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: Error;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: Error;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only the recurring task's owner can resume it.
+     */
+    403: Error;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: No recurring task with that id in the workspace, recurring tasks aren't turned on for the workspace, or the workspace doesn't exist or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: Error;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `recurring_task_limit`: The owner already has 10 recurring tasks in this workspace that aren't paused. Pause or delete one first.
+     */
+    409: Error;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: Error;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: Error;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: Error;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: Error;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `unavailable`: The recurring task was resumed, but Sinatra couldn't update its schedule. Retry.
+     */
+    503: Error;
+};
+
+export type RecurringTasksResumeError = RecurringTasksResumeErrors[keyof RecurringTasksResumeErrors];
+
+export type RecurringTasksResumeResponses = {
+    /**
+     * The resumed recurring task, with its next run time.
+     */
+    200: RecurringTaskResponse;
+};
+
+export type RecurringTasksResumeResponse = RecurringTasksResumeResponses[keyof RecurringTasksResumeResponses];
+
+export type RecurringTasksRunData = {
+    body?: never;
+    path: {
+        /**
+         * The workspace's id, from `GET /v1/me`.
+         */
+        workspaceId: string;
+        /**
+         * The recurring task's id, from `GET /v1/workspaces/{workspaceId}/recurring-tasks`. Not the id of a task a run started.
+         */
+        taskId: string;
+    };
+    query?: never;
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}/run';
+};
+
+export type RecurringTasksRunErrors = {
+    /**
+     * Bad request. The `error` code says which:
+     *
+     * - `bad_request`: The body isn't valid JSON, or is empty.
+     */
+    400: RecurringTaskRunError;
+    /**
+     * Unauthorized. The `error` code says which:
+     *
+     * - `invalid_token`: The token is missing, malformed, expired or revoked, or it's an OAuth access token issued for Sinatra's MCP server rather than this API.
+     */
+    401: RecurringTaskRunError;
+    /**
+     * Forbidden. The `error` code says which:
+     *
+     * - `actor_not_authorized`: Only the recurring task's owner can run it.
+     */
+    403: RecurringTaskRunError;
+    /**
+     * Not found. The `error` code says which:
+     *
+     * - `not_found`: No recurring task with that id in the workspace, recurring tasks aren't turned on for the workspace, or the workspace doesn't exist or you aren't a member of it. The API answers 404 and never 403, so it doesn't reveal which workspaces exist.
+     */
+    404: RecurringTaskRunError;
+    /**
+     * Conflict. The `error` code says which:
+     *
+     * - `capacity_full`: The workspace's queue is full, so the run didn't start. `reason` is the message to show, the same one the dashboard shows.
+     * - `feature_off`: Recurring tasks were turned off for the workspace while the run was starting.
+     * - `github_not_connected`: The workspace's GitHub App installation is suspended (`refusal` is `suspended`). `reason` says what to do and ends with `settingsUrl`, the installation's page on GitHub. A workspace not connected to GitHub at all isn't refused: runs name no repository.
+     * - `owner_left`: The owner is no longer a member of the workspace.
+     * - `payment_required`: Billing would stop the task: you have no model access in this workspace (`refusal` is `own_credentials_required`), or its subscription is past due (`refusal` is `subscription_inactive`). `reason` says what to do and ends with `billingUrl`, the settings section that fixes it: your model credentials for `own_credentials_required`, billing for `subscription_inactive`.
+     * - `previous_run_active`: An earlier run's task is still running or queued, or another run is still starting. Try again once it finishes.
+     * - `start_failed`: The run couldn't start before the recurring task's next scheduled time.
+     * - `task_missing`: The recurring task was deleted while the run was starting.
+     * - `waiting_for_reply`: An earlier run's task is waiting for a reply. Answer it or dismiss it, then try again.
+     */
+    409: RecurringTaskRunError;
+    /**
+     * Payload too large. The `error` code says which:
+     *
+     * - `bad_request`: The body is too large.
+     */
+    413: RecurringTaskRunError;
+    /**
+     * Unsupported media type. The `error` code says which:
+     *
+     * - `bad_request`: The body's `Content-Type` isn't one the API reads. Send JSON with `Content-Type: application/json`.
+     */
+    415: RecurringTaskRunError;
+    /**
+     * Too many requests. The `error` code says which:
+     *
+     * - `bad_request`: You're over the request rate limit: 600 GET requests a minute, or 120 POST, PUT, PATCH or DELETE requests a minute, per token and per endpoint. Wait the seconds in the `Retry-After` header, then retry.
+     */
+    429: RecurringTaskRunError;
+    /**
+     * Internal server error. The `error` code says which:
+     *
+     * - `internal_error`: Something went wrong on Sinatra's side. Retry; if it keeps happening, share the `x-request-id` header with support.
+     */
+    500: RecurringTaskRunError;
+    /**
+     * Unavailable. The `error` code says which:
+     *
+     * - `unavailable`: Sinatra couldn't start the run's task. `taskId` is the task that was made, if one was. Retry later.
+     */
+    503: RecurringTaskRunError;
+};
+
+export type RecurringTasksRunError = RecurringTasksRunErrors[keyof RecurringTasksRunErrors];
+
+export type RecurringTasksRunResponses = {
+    /**
+     * The run and the task it started.
+     */
+    201: RecurringTaskStarted;
+};
+
+export type RecurringTasksRunResponse = RecurringTasksRunResponses[keyof RecurringTasksRunResponses];

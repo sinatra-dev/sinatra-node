@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BillingCheckoutData, BillingCheckoutErrors, BillingCheckoutResponses, BillingPortalData, BillingPortalErrors, BillingPortalResponses, BillingStatusData, BillingStatusErrors, BillingStatusResponses, ConnectorsConnectData, ConnectorsConnectErrors, ConnectorsConnectResponses, ConnectorsDisconnectData, ConnectorsDisconnectErrors, ConnectorsDisconnectResponses, ConnectorsListData, ConnectorsListErrors, ConnectorsListResponses, IntegrationsConnectData, IntegrationsConnectErrors, IntegrationsConnectResponses, MeGetAccountData, MeGetAccountErrors, MeGetAccountResponses, MeGetData, MeGetEmailPreferencesData, MeGetEmailPreferencesErrors, MeGetEmailPreferencesResponses, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, MeUpdateEmailPreferencesData, MeUpdateEmailPreferencesErrors, MeUpdateEmailPreferencesResponses, ReposClearOverrideData, ReposClearOverrideErrors, ReposClearOverrideResponses, ReposDeleteSecretData, ReposDeleteSecretErrors, ReposDeleteSecretResponses, ReposDismissCapabilityRequestData, ReposDismissCapabilityRequestErrors, ReposDismissCapabilityRequestResponses, ReposGetCapabilityRequestsData, ReposGetCapabilityRequestsErrors, ReposGetCapabilityRequestsResponses, ReposGetConfigData, ReposGetConfigErrors, ReposGetConfigResponses, ReposGetEnvironmentData, ReposGetEnvironmentErrors, ReposGetEnvironmentResponses, ReposGetStatusesData, ReposGetStatusesErrors, ReposGetStatusesResponses, RepositoriesGetReviewExternalPrsData, RepositoriesGetReviewExternalPrsErrors, RepositoriesGetReviewExternalPrsResponses, RepositoriesSetReviewExternalPrsData, RepositoriesSetReviewExternalPrsErrors, RepositoriesSetReviewExternalPrsResponses, ReposListSecretsData, ReposListSecretsErrors, ReposListSecretsResponses, ReposPatchSecretData, ReposPatchSecretErrors, ReposPatchSecretResponses, ReposPreflightData, ReposPreflightErrors, ReposPreflightResponses, ReposPutSecretData, ReposPutSecretErrors, ReposPutSecretResponses, ReposSetOverrideData, ReposSetOverrideErrors, ReposSetOverrideResponses, SubscriptionsCompleteData, SubscriptionsCompleteErrors, SubscriptionsCompleteResponses, SubscriptionsListData, SubscriptionsListErrors, SubscriptionsListResponses, SubscriptionsPollData, SubscriptionsPollErrors, SubscriptionsPollResponses, SubscriptionsRemoveData, SubscriptionsRemoveErrors, SubscriptionsRemoveResponses, SubscriptionsStartData, SubscriptionsStartErrors, SubscriptionsStartResponses, SubscriptionsUpdateData, SubscriptionsUpdateErrors, SubscriptionsUpdateResponses, SubscriptionsUsageData, SubscriptionsUsageErrors, SubscriptionsUsageResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksDismissData, TasksDismissErrors, TasksDismissResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses, WorkspaceAccessApproveRequestData, WorkspaceAccessApproveRequestErrors, WorkspaceAccessApproveRequestResponses, WorkspaceAccessCreateInviteData, WorkspaceAccessCreateInviteErrors, WorkspaceAccessCreateInviteResponses, WorkspaceAccessDenyRequestData, WorkspaceAccessDenyRequestErrors, WorkspaceAccessDenyRequestResponses, WorkspaceAccessLeaveData, WorkspaceAccessLeaveErrors, WorkspaceAccessLeaveResponses, WorkspaceAccessListData, WorkspaceAccessListErrors, WorkspaceAccessListResponses, WorkspaceAccessRemoveMemberData, WorkspaceAccessRemoveMemberErrors, WorkspaceAccessRemoveMemberResponses, WorkspaceAccessResendInviteData, WorkspaceAccessResendInviteErrors, WorkspaceAccessResendInviteResponses, WorkspaceAccessRevokeInviteData, WorkspaceAccessRevokeInviteErrors, WorkspaceAccessRevokeInviteResponses, WorkspaceAccessSetRoleData, WorkspaceAccessSetRoleErrors, WorkspaceAccessSetRoleResponses, WorkspaceAccessTransferOwnerData, WorkspaceAccessTransferOwnerErrors, WorkspaceAccessTransferOwnerResponses, WorkspaceModelsAddKeyData, WorkspaceModelsAddKeyErrors, WorkspaceModelsAddKeyResponses, WorkspaceModelsClearDefaultData, WorkspaceModelsClearDefaultErrors, WorkspaceModelsClearDefaultResponses, WorkspaceModelsGetDefaultData, WorkspaceModelsGetDefaultErrors, WorkspaceModelsGetDefaultResponses, WorkspaceModelsListKeysData, WorkspaceModelsListKeysErrors, WorkspaceModelsListKeysResponses, WorkspaceModelsRemoveKeyData, WorkspaceModelsRemoveKeyErrors, WorkspaceModelsRemoveKeyResponses, WorkspaceModelsSetDefaultData, WorkspaceModelsSetDefaultErrors, WorkspaceModelsSetDefaultResponses, WorkspacesCreateData, WorkspacesCreateErrors, WorkspacesCreateResponses, WorkspacesGetData, WorkspacesGetErrors, WorkspacesGetResponses, WorkspacesGetReviewExternalPrsData, WorkspacesGetReviewExternalPrsErrors, WorkspacesGetReviewExternalPrsResponses, WorkspacesSetReviewExternalPrsData, WorkspacesSetReviewExternalPrsErrors, WorkspacesSetReviewExternalPrsResponses } from './types.gen';
+import type { BillingCheckoutData, BillingCheckoutErrors, BillingCheckoutResponses, BillingPortalData, BillingPortalErrors, BillingPortalResponses, BillingStatusData, BillingStatusErrors, BillingStatusResponses, ConnectorsConnectData, ConnectorsConnectErrors, ConnectorsConnectResponses, ConnectorsDisconnectData, ConnectorsDisconnectErrors, ConnectorsDisconnectResponses, ConnectorsListData, ConnectorsListErrors, ConnectorsListResponses, IntegrationsConnectData, IntegrationsConnectErrors, IntegrationsConnectResponses, MeGetAccountData, MeGetAccountErrors, MeGetAccountResponses, MeGetData, MeGetEmailPreferencesData, MeGetEmailPreferencesErrors, MeGetEmailPreferencesResponses, MeGetErrors, MeGetResponses, MeRevokeTokenData, MeRevokeTokenErrors, MeRevokeTokenResponses, MessagesCreateData, MessagesCreateErrors, MessagesCreateResponses, MessagesListData, MessagesListErrors, MessagesListResponses, MeUpdateEmailPreferencesData, MeUpdateEmailPreferencesErrors, MeUpdateEmailPreferencesResponses, RecurringTasksCreateData, RecurringTasksCreateErrors, RecurringTasksCreateResponses, RecurringTasksDeleteData, RecurringTasksDeleteErrors, RecurringTasksDeleteResponses, RecurringTasksGetData, RecurringTasksGetErrors, RecurringTasksGetResponses, RecurringTasksListData, RecurringTasksListErrors, RecurringTasksListResponses, RecurringTasksPauseData, RecurringTasksPauseErrors, RecurringTasksPauseResponses, RecurringTasksResumeData, RecurringTasksResumeErrors, RecurringTasksResumeResponses, RecurringTasksRunData, RecurringTasksRunErrors, RecurringTasksRunResponses, RecurringTasksUpdateData, RecurringTasksUpdateErrors, RecurringTasksUpdateResponses, ReposClearOverrideData, ReposClearOverrideErrors, ReposClearOverrideResponses, ReposDeleteSecretData, ReposDeleteSecretErrors, ReposDeleteSecretResponses, ReposDismissCapabilityRequestData, ReposDismissCapabilityRequestErrors, ReposDismissCapabilityRequestResponses, ReposGetCapabilityRequestsData, ReposGetCapabilityRequestsErrors, ReposGetCapabilityRequestsResponses, ReposGetConfigData, ReposGetConfigErrors, ReposGetConfigResponses, ReposGetEnvironmentData, ReposGetEnvironmentErrors, ReposGetEnvironmentResponses, ReposGetStatusesData, ReposGetStatusesErrors, ReposGetStatusesResponses, RepositoriesGetReviewExternalPrsData, RepositoriesGetReviewExternalPrsErrors, RepositoriesGetReviewExternalPrsResponses, RepositoriesSetReviewExternalPrsData, RepositoriesSetReviewExternalPrsErrors, RepositoriesSetReviewExternalPrsResponses, ReposListSecretsData, ReposListSecretsErrors, ReposListSecretsResponses, ReposPatchSecretData, ReposPatchSecretErrors, ReposPatchSecretResponses, ReposPreflightData, ReposPreflightErrors, ReposPreflightResponses, ReposPutSecretData, ReposPutSecretErrors, ReposPutSecretResponses, ReposSetOverrideData, ReposSetOverrideErrors, ReposSetOverrideResponses, SubscriptionsCompleteData, SubscriptionsCompleteErrors, SubscriptionsCompleteResponses, SubscriptionsListData, SubscriptionsListErrors, SubscriptionsListResponses, SubscriptionsPollData, SubscriptionsPollErrors, SubscriptionsPollResponses, SubscriptionsRemoveData, SubscriptionsRemoveErrors, SubscriptionsRemoveResponses, SubscriptionsStartData, SubscriptionsStartErrors, SubscriptionsStartResponses, SubscriptionsUpdateData, SubscriptionsUpdateErrors, SubscriptionsUpdateResponses, SubscriptionsUsageData, SubscriptionsUsageErrors, SubscriptionsUsageResponses, TasksCreateData, TasksCreateErrors, TasksCreateResponses, TasksDismissData, TasksDismissErrors, TasksDismissResponses, TasksGetData, TasksGetErrors, TasksGetResponses, TasksListData, TasksListErrors, TasksListResponses, TasksStopData, TasksStopErrors, TasksStopResponses, TicketsDelegateData, TicketsDelegateErrors, TicketsDelegateResponses, TicketsSearchData, TicketsSearchErrors, TicketsSearchResponses, WorkspaceAccessApproveRequestData, WorkspaceAccessApproveRequestErrors, WorkspaceAccessApproveRequestResponses, WorkspaceAccessCreateInviteData, WorkspaceAccessCreateInviteErrors, WorkspaceAccessCreateInviteResponses, WorkspaceAccessDenyRequestData, WorkspaceAccessDenyRequestErrors, WorkspaceAccessDenyRequestResponses, WorkspaceAccessLeaveData, WorkspaceAccessLeaveErrors, WorkspaceAccessLeaveResponses, WorkspaceAccessListData, WorkspaceAccessListErrors, WorkspaceAccessListResponses, WorkspaceAccessRemoveMemberData, WorkspaceAccessRemoveMemberErrors, WorkspaceAccessRemoveMemberResponses, WorkspaceAccessResendInviteData, WorkspaceAccessResendInviteErrors, WorkspaceAccessResendInviteResponses, WorkspaceAccessRevokeInviteData, WorkspaceAccessRevokeInviteErrors, WorkspaceAccessRevokeInviteResponses, WorkspaceAccessSetRoleData, WorkspaceAccessSetRoleErrors, WorkspaceAccessSetRoleResponses, WorkspaceAccessTransferOwnerData, WorkspaceAccessTransferOwnerErrors, WorkspaceAccessTransferOwnerResponses, WorkspaceModelsAddKeyData, WorkspaceModelsAddKeyErrors, WorkspaceModelsAddKeyResponses, WorkspaceModelsClearDefaultData, WorkspaceModelsClearDefaultErrors, WorkspaceModelsClearDefaultResponses, WorkspaceModelsGetDefaultData, WorkspaceModelsGetDefaultErrors, WorkspaceModelsGetDefaultResponses, WorkspaceModelsListKeysData, WorkspaceModelsListKeysErrors, WorkspaceModelsListKeysResponses, WorkspaceModelsRemoveKeyData, WorkspaceModelsRemoveKeyErrors, WorkspaceModelsRemoveKeyResponses, WorkspaceModelsSetDefaultData, WorkspaceModelsSetDefaultErrors, WorkspaceModelsSetDefaultResponses, WorkspacesCreateData, WorkspacesCreateErrors, WorkspacesCreateResponses, WorkspacesGetData, WorkspacesGetErrors, WorkspacesGetResponses, WorkspacesGetReviewExternalPrsData, WorkspacesGetReviewExternalPrsErrors, WorkspacesGetReviewExternalPrsResponses, WorkspacesSetReviewExternalPrsData, WorkspacesSetReviewExternalPrsErrors, WorkspacesSetReviewExternalPrsResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -829,4 +829,100 @@ export const subscriptionsComplete = <ThrowOnError extends boolean = false>(opti
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * List recurring tasks
+ *
+ * Lists the workspace's recurring tasks, newest first, each with its owner, its most recent run and when it next runs. Any workspace member can list them. A recurring task starts a task on its schedule, as the member who created it, until someone pauses or deletes it.
+ */
+export const recurringTasksList = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksListData, ThrowOnError>): RequestResult<RecurringTasksListResponses, RecurringTasksListErrors, ThrowOnError> => (options.client ?? client).get<RecurringTasksListResponses, RecurringTasksListErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks',
+    ...options
+});
+
+/**
+ * Create a recurring task
+ *
+ * Creates a prompt that starts a task on a schedule. Any workspace member can create one, and owns what they create: every run starts a task as them, the way a start from this API does, with no repository named. A member can have up to 10 recurring tasks that aren't paused in a workspace. `name` defaults to the prompt's first line and `notifyByEmail` to `true`. Billing and the GitHub connection are checked now and again at every run; a full queue doesn't stop a create.
+ */
+export const recurringTasksCreate = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksCreateData, ThrowOnError>): RequestResult<RecurringTasksCreateResponses, RecurringTasksCreateErrors, ThrowOnError> => (options.client ?? client).post<RecurringTasksCreateResponses, RecurringTasksCreateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a recurring task
+ *
+ * Deletes a recurring task so no more runs start. The owner, or a workspace owner or admin, can delete it. Its run history goes with it; tasks its runs started keep going.
+ */
+export const recurringTasksDelete = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksDeleteData, ThrowOnError>): RequestResult<RecurringTasksDeleteResponses, RecurringTasksDeleteErrors, ThrowOnError> => (options.client ?? client).delete<RecurringTasksDeleteResponses, RecurringTasksDeleteErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}',
+    ...options
+});
+
+/**
+ * Get a recurring task
+ *
+ * Returns a recurring task and its runs, newest first, 50 at a time. Any workspace member can read it. Pass `next` as `before` to read older runs.
+ */
+export const recurringTasksGet = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksGetData, ThrowOnError>): RequestResult<RecurringTasksGetResponses, RecurringTasksGetErrors, ThrowOnError> => (options.client ?? client).get<RecurringTasksGetResponses, RecurringTasksGetErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}',
+    ...options
+});
+
+/**
+ * Edit a recurring task
+ *
+ * Changes a recurring task's name, prompt, schedule, time zone or email setting. Only the owner can edit it. Fields you leave out stay as they are, and a paused recurring task stays paused. Billing and the GitHub connection are checked again, as for a create. Runs already made keep the prompt and name they had.
+ */
+export const recurringTasksUpdate = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksUpdateData, ThrowOnError>): RequestResult<RecurringTasksUpdateResponses, RecurringTasksUpdateErrors, ThrowOnError> => (options.client ?? client).patch<RecurringTasksUpdateResponses, RecurringTasksUpdateErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Pause a recurring task
+ *
+ * Stops a recurring task's scheduled runs until the owner resumes it. The owner, or a workspace owner or admin, can pause it. The owner can still run it now.
+ */
+export const recurringTasksPause = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksPauseData, ThrowOnError>): RequestResult<RecurringTasksPauseResponses, RecurringTasksPauseErrors, ThrowOnError> => (options.client ?? client).post<RecurringTasksPauseResponses, RecurringTasksPauseErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}/pause',
+    ...options
+});
+
+/**
+ * Resume a recurring task
+ *
+ * Turns a paused recurring task's scheduled runs back on, from the next scheduled time. Only the owner can resume it. A resumed recurring task counts toward the owner's 10 that aren't paused.
+ */
+export const recurringTasksResume = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksResumeData, ThrowOnError>): RequestResult<RecurringTasksResumeResponses, RecurringTasksResumeErrors, ThrowOnError> => (options.client ?? client).post<RecurringTasksResumeResponses, RecurringTasksResumeErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}/resume',
+    ...options
+});
+
+/**
+ * Run a recurring task now
+ *
+ * Starts one run of a recurring task now, without changing its schedule. Only the owner can run it, and the run's task is theirs. It works while the recurring task is paused, and doesn't resume it. A run doesn't start while an earlier run's task is still running, queued or waiting for a reply, and starting it goes through the same billing, GitHub and queue checks as a start from this API. When the run doesn't start, the error body's `run` is the run as recorded, with its `outcome` and `reason`.
+ */
+export const recurringTasksRun = <ThrowOnError extends boolean = false>(options: Options<RecurringTasksRunData, ThrowOnError>): RequestResult<RecurringTasksRunResponses, RecurringTasksRunErrors, ThrowOnError> => (options.client ?? client).post<RecurringTasksRunResponses, RecurringTasksRunErrors, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/v1/workspaces/{workspaceId}/recurring-tasks/{taskId}/run',
+    ...options
 });
